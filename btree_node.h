@@ -7,6 +7,8 @@
 #include <iomanip>
 #include "btree_functions.h"
 
+static const int DEBUG = 1;
+
 using namespace std;
 
 template<typename T>
@@ -18,11 +20,14 @@ struct btree_node{
 
     //MEMBER FUNCTIONS
     bool insert(const T& input);
-    void print(size_t level=0) const;
+    void print(size_t level=0);
+    bool excess() const;
     template<typename U>
     friend ostream& operator <<(ostream& outs, btree_node<U>& node);
+    template<typename U>
+    friend void fix_excess(btree_node<U>*& node);
 private:
-    size_t _min, __d_c, __c_c; //__d_c: datacount, __c_c: childrencount
+    size_t _min, __d_s, __c_s; //__d_s: datacount, __c_s: childrencount
     bool __dupes;
     T* __d; //data
     btree_node<T>** __c; //children
@@ -32,8 +37,8 @@ private:
 template<typename T>
 btree_node<T>::btree_node(size_t min, bool dupes)
     : _min(min), __dupes(dupes){
-    __d_c = 0;
-    __c_c = 0;
+    __d_s = 0;
+    __c_s = 0;
     __d = new T[_min*2+1];
     __c = new btree_node<T>*[_min*2+2];
     for(size_t i = 0; i < _min*2+2; i++)
@@ -43,33 +48,111 @@ template<typename T>
 bool btree_node<T>::insert(const T &input){
     if(is_leaf()){ //check if there are children
         //Then insert into this
-        insert_sorted(__d, __d_c, input, __dupes);
+        return insert_sorted(__d, __d_s, input, __dupes);
+    }else{
+        //get the child the input will be inserted into
+        size_t child = first_ge(__d, __d_s, input);
+        bool check = __c[child]->insert(input);
+        if(__c[child]->excess()){
+            //The child is overburdened. Take action
+            if(DEBUG) cout << "[INSERT]: Overburdened after inserting " << input << endl;
+            //Handle children by splitting them up and taking one
+            btree_node<T>* new_child = new btree_node<T>(_min, __dupes);
+            //give new_child right half:
+            //Give _min data elements, _min+1 children
+            for(size_t i = _min+1; i < __c[child]->__d_s; i++){ //give data
+                swap(__c[child]->__d[i], new_child->__d[i-_min-1]);
+            }
+            for(size_t i = _min+1; i < __c[child]->__c_s; i++){ //give data
+                swap(__c[child]->__c[i], new_child->__c[i-_min-1]);
+            }
+            new_child->__d_s = _min; //increase new_child values
+            new_child->__c_s = _min+1;
+            __c[child]->__d_s-=_min; //reduce old_child's values
+            __c[child]->__c_s-=_min+1;
+            T d; //take the child's middle value and move it into parent
+            swap(__c[child]->__d[_min], d);
+            __c[child]->__d_s--;
+            insert_sorted(__d, __d_s, d, __dupes);
+            //Now move the new child into the parent (this)
+            //Child will go into spot child+1
+            delete __c[__c_s];
+            __c[__c_s] = new_child;
+            for(size_t i = __c_s; i > child+1; i--){
+                swap(__c[i], __c[i-1]);
+            }
+            __c_s++;
+        }
+        return check;
     }
 }
 template<typename T>
 bool btree_node<T>::is_leaf() const{
-    if(__c_c == 0)
+    if(__c[0]==nullptr)
         return true;
     else
         return false;
 }
 template<typename T>
-void btree_node<T>::print(size_t level) const{
-    if(is_leaf()){
-        cout << setiosflags(ios_base::fixed) << setw(level)
-             << (*this);
+void btree_node<T>::print(size_t level){
+    cout << "Printing\n";
+    cout << setiosflags(ios_base::fixed) << setw(level)
+         << (*this);
+    if(!is_leaf()){
+        //Print the first half of children
+        for(size_t i = 0; i < __c_s/2+1; i++)
+            __c[i]->print(15+level);
     }
+    if(!is_leaf()){
+        //Print the first half of children
+        for(size_t i = __c_s/2+1; i < __c_s; i++)
+            __c[i]->print(15+level);
+    }
+}
+template<typename T>
+bool btree_node<T>::excess() const{
+    if(__d_s > 2*_min)
+        return true;
+    else
+        return false;
 }
 template<typename T>
 ostream& operator <<(ostream& outs, btree_node<T>& node){
     outs << "[";
-    for(size_t i = 0; i < node.__d_c; i++){
+    for(size_t i = 0; i < node.__d_s; i++){
         outs << node.__d[i];
-        if(i+1 < node.__d_c)
+        if(i+1 < node.__d_s)
             outs<< " ";
     }
     outs << "]";
     return outs;
 }
-
+template<typename T>
+void fix_excess(btree_node<T>*& node){
+    //Used for fixing the root if it is too large
+    if(node->__d_s > node->_min*2){
+        //Fix it!
+        btree_node<T>* new_root = new btree_node<T>(node->_min, node->__dupes);
+        btree_node<T>* new_child = new btree_node<T>(node->_min, node->__dupes);
+        new_root->__c[0] = node;
+        new_root->__c[1] = new_child;
+        new_root->__c_s = 2;
+        //Give _min data elements, _min+1 children
+        for(size_t i = node->_min+1; i < node->__d_s; i++){ //give data
+            swap(node->__d[i], new_child->__d[i-node->_min-1]);
+        }
+        for(size_t i = node->_min+1; i < node->__c_s; i++){ //give data
+            swap(node->__c[i], new_child->__c[i-node->_min-1]);
+        }
+        new_child->__d_s = node->_min; //increase new_child values
+        new_child->__c_s = node->_min+1;
+        node->__d_s-=node->_min; //reduce old_child's values
+        node->__c_s-=node->_min+1;
+        T d; //take the child's middle value and move it into parent
+        swap(node->__d[node->_min], d);
+        node->__d_s--;
+        insert_sorted(new_root->__d, new_root->__d_s, d, node->__dupes);
+        node = new_root;
+    }
+}
 #endif // BTREE_NODE_H
