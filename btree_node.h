@@ -35,6 +35,10 @@ struct btree_node{
     btree_node<T>** __c; //children
     bool is_leaf() const;
     void insert_child(btree_node<T> *node);
+    bool rotate_left(size_t i); //rotates from a leaf sibling with spare data
+    bool rotate_right(size_t i);
+    //Checks all children to see if anyone can lend the empty sibling data
+    bool rotate_check(size_t i);
 };
 
 template<typename T>
@@ -106,6 +110,14 @@ bool btree_node<T>::remove(const T& input){
             return true; //It's done, we're good
         else if(__c[child]->is_leaf()){
             //Scenario 2: Empty leaf
+            bool r_check = rotate_check(child);
+            if(r_check)
+                return true;
+            //Scenario 3: No siblings
+            //Sub scenario 1: Give + merge with data of parent
+
+            //sub scenario 2: Give the lone data of the parent
+            //and then get a loan from parents
 
         }
     }
@@ -221,5 +233,62 @@ bool btree_node<T>::verify() const{
             return true;
         }
     }
+}
+template<typename T>
+bool btree_node<T>::rotate_left(size_t i){
+    if(__c[i+1]->__d_s < 2) //cannot take from a child with less than 2
+        return false;
+    if(DEBUG>5) cout << "Rotate left\n";
+    //Move the smallest element from the right child to the left
+    T d; //temporary data
+    //Take from the right child, then sort it and reduce size
+    swap(__c[i+1]->__d[0], d);
+    for(size_t j = 0; j < __c[i+1]->__d_s; j++){
+        swap(__c[i+1]->__d[j], __c[i+1]->__d[j+1]);
+    }
+    __c[i+1]->__d_s--;
+    //Next, swap that into current i in this
+    swap(__d[i], d);
+    //Next, insert  the data into the index's child
+    __c[i]->insert(d);
+    rotate_left(i-1);
+    return true;
+}
+template<typename T>
+bool btree_node<T>::rotate_right(size_t i){
+    if(__c[i]->__d_s < 2) //cannot take from a child with less than 2
+        return false;
+    if(DEBUG>5) cout << "rotating right\n";
+    //Move the largest element from the index's child to the right
+    T d; //temporary data
+    //Take from the right child, then sort it and reduce size
+    swap(__c[i]->__d[__c[i]->__d_s-1], d); //End of array, pushed out of bounds
+    __c[i]->__d_s--;
+    //Next, swap that into current i in this
+    swap(__d[i], d);
+    //Next, insert  the data into the index's child
+    __c[i+1]->insert(d);
+    rotate_right(i+1); //Recursive call. It should run until the index is filled
+    return true;
+}
+template<typename T>
+bool btree_node<T>::rotate_check(size_t i){
+    //Checks all children for possible spares
+    bool flag_complete = false;
+    for(int j = i-1; j >= 0; j--){
+        //Keep trying to rotate right
+        if(rotate_right(j)){
+            flag_complete = true;
+            break;
+        }
+    }
+    for(int j = i; j < __d_s; j++){
+        if(rotate_left(j)){
+            flag_complete = true;
+            break;
+        }
+    }
+
+    return flag_complete;
 }
 #endif // BTREE_NODE_H

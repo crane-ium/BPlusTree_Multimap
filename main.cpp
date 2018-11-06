@@ -11,6 +11,12 @@ int main()
     for(size_t i = 0; i < 10; i++)
         btr.insert(i);
     btr.remove(7);
+    btr.remove(1);
+    btr.remove(0);
+    btr.remove(2);
+    btr.remove(5);
+    btr.print();
+    btr.remove(3);
     btr.print();
     btr.verify();
 //    btree_node<int>* node = new btree_node<int>(1);
