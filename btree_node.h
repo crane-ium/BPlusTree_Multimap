@@ -22,6 +22,7 @@ struct btree_node{
     bool insert(const T& input);
     void print(size_t level=0);
     bool excess() const;
+    bool verify() const;
     template<typename U>
     friend ostream& operator <<(ostream& outs, btree_node<U>& node);
     template<typename U>
@@ -91,7 +92,6 @@ template<typename T>
 void btree_node<T>::print(size_t level){
     //PRINT BACKWARDS
     if(!is_leaf()){
-        cout << "Print\n";
         //Print the first half of children
         for(size_t i = (__d_s); i > (__d_s)/2; i--)
             __c[i]->print(15+level);
@@ -156,6 +156,43 @@ void btree_node<T>::insert_child(btree_node<T>* node){
     for(size_t i = _min*2+1; i > 0; i--){
         if(__c[i-1] == nullptr || __c[i]->__d[0] < __c[i-1]->__d[0])
             swap(__c[i], __c[i-1]);
+    }
+}
+template<typename T>
+bool btree_node<T>::verify() const{
+    //Check children and data align
+    if(is_leaf()){
+        //check that there are no children
+        for(size_t i = 0; i < 2*_min+2; i++){
+            if(__c[i] != nullptr){
+                cout << "There is a child in a leaf\n";
+                return false;
+            }
+        }
+        return true;
+    }else{
+        for(size_t i = 0; i < __d_s+1; i++){
+            //Check that the children are placed accordingly to the data
+            if(i < __d_s){
+                if(__d[i] < __c[i]->__d[0]){
+                    cout << "Index's child is greater than data\n";
+                    return false;
+                }
+            }else{ //check last child
+                if(__d[i-1] > __c[i]->__d[0]){
+                    cout << "Last child is smaller than data\n";
+                    return false;
+                }
+            }
+            try{
+                if(!__c[i]->verify()) //if there is a nullptr in __c, then it will crash
+                    return false;
+            }catch(...){
+                cout << "Nullptr child\n";
+                return false;
+            }
+            return true;
+        }
     }
 }
 #endif // BTREE_NODE_H
