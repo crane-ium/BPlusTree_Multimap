@@ -13,6 +13,14 @@ bool is_there(T* data, const size_t s, const T& target){
     return false;
 }
 template<typename T>
+size_t index_of(T* data, const size_t s, const T& target){
+    //Returns the index of the found target, else returns s
+    for(size_t i = 0; i < s; i++)
+        if(data[i] == target)
+            return i;
+    return s;
+}
+template<typename T>
 size_t first_ge(T* data, const size_t s, const T& target){
     //Return the first index that data[index] is >= target
     for(size_t i = 0; i < s; i++)
