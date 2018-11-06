@@ -20,7 +20,8 @@ struct btree_node{
 
     //MEMBER FUNCTIONS
     bool insert(const T& input);
-    void print(size_t level=0);
+    bool remove(const T& input); //Removes a found input
+    void print(size_t level=0); //prints the whole tree from the node
     bool excess() const;
     bool verify() const;
     template<typename U>
@@ -82,6 +83,34 @@ bool btree_node<T>::insert(const T &input){
     }
 }
 template<typename T>
+bool btree_node<T>::remove(const T& input){
+    //Removes a data element if it is found
+    if(is_there(__d, __d_s, input)){
+        //Found it, remove it. Then deal with consequences
+        size_t d_i = index_of(__d, __d_s, input);
+        for(size_t i = d_i; i < __d_s; i++){ //sort it out of bounds
+            swap(__d[i], __d[i+1]);
+        }
+        __d_s--;
+        return true;
+    }else if(is_leaf()){
+        return false;
+    }else{
+        size_t child = first_ge(__d, __d_s, input);
+        bool check = __c[child]->remove(input);
+        if(!check) //it wasn't found. Return to exit
+            return false;
+        //else we check if anything needs management
+        //Scenario 1: Child is leaf with spares
+        if(__c[child]->is_leaf() && __c[child]->__d_s > 0)
+            return true; //It's done, we're good
+        else if(__c[child]->is_leaf()){
+            //Scenario 2: Empty leaf
+
+        }
+    }
+}
+template<typename T>
 bool btree_node<T>::is_leaf() const{
     if(__c[0]==nullptr)
         return true;
@@ -129,8 +158,6 @@ void fix_excess(btree_node<T>*& node){
         //Fix it!
         btree_node<T>* new_root = new btree_node<T>(node->_min, node->__dupes);
         btree_node<T>* new_child = new btree_node<T>(node->_min, node->__dupes);
-//        new_root->__c[0] = node;
-//        new_root->__c[1] = new_child;
         //Give _min data elements, _min+1 children
         for(size_t i = node->_min+1; i < node->__d_s; i++){ //give data
             swap(node->__d[i], new_child->__d[i-node->_min-1]);

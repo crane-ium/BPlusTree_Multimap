@@ -12,7 +12,9 @@ public:
 
     //MEMBER FUNCTIONS
     bool insert(const T& input);
+    bool remove(const T& input);
     void print();
+    bool verify() const;
 private:
     size_t _min;
     bool __dupes;
@@ -27,11 +29,29 @@ template<typename T>
 bool BTree<T>::insert(const T &input){
     bool check = __head->insert(input);
     fix_excess(__head);
+//    assert(__head->verify());
+    return check;
+}
+template<typename T>
+bool BTree<T>::remove(const T &input){
+    //Tries to remove a desired input;
+    //Returns false if no found input;
+    bool check = __head->remove(input);
+    //Check if __head needs reorganizing too
+
     return check;
 }
 template<typename T>
 void BTree<T>::print(){
     __head->print();
+}
+template<typename T>
+bool BTree<T>::verify() const{
+    bool check = __head->verify();
+    if(check)
+        cout << "----VERIFIED----\n";
+    else
+        cout << "!!!!FAILED VERIFICATION!!!!\n";
 }
 
 #endif // BTREE_H
