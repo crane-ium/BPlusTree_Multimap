@@ -42,5 +42,11 @@ bool insert_sorted(T* data, size_t& s, const T& target, bool dupes=false){
     s++;
     return true;
 }
-
+template<typename T>
+void move_to_end(T* data, size_t& s, size_t i){
+    for(size_t j = i; j < s; j++){
+        swap(data[j], data[j+1]);
+    }
+    s--;
+}
 #endif // BTREE_FUNCTIONS_H

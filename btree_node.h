@@ -88,6 +88,7 @@ bool btree_node<T>::insert(const T &input){
 }
 template<typename T>
 bool btree_node<T>::remove(const T& input){
+    //RETURNS FALSE IF NO WORK LEFT TO DO!!!
     //Removes a data element if it is found
     if(is_there(__d, __d_s, input)){
         //Found it, remove it. Then deal with consequences
@@ -102,22 +103,52 @@ bool btree_node<T>::remove(const T& input){
     }else{
         size_t child = first_ge(__d, __d_s, input);
         bool check = __c[child]->remove(input);
-        if(!check) //it wasn't found. Return to exit
+        if(!check) //it wasn't found or nothing to do. Return to exit
             return false;
         //else we check if anything needs management
         //Scenario 1: Child is leaf with spares
         if(__c[child]->is_leaf() && __c[child]->__d_s > 0)
-            return true; //It's done, we're good
+            return false; //It's done, we're good
         else if(__c[child]->is_leaf()){
             //Scenario 2: Empty leaf
             bool r_check = rotate_check(child);
             if(r_check)
-                return true;
+                return false;
             //Scenario 3: No siblings
             //Sub scenario 1: Give + merge with data of parent
-
+            if(__d_s > 1){
+                T d;
+                btree_node<T>* ptr;
+                bool flag = true;
+                if(child < __d_s){
+                    swap(d, __d[child]); //take the data
+                    ptr = __c[child+1];
+                    delete __c[child];
+                    __c[child] = nullptr;
+                }else{
+                    swap(d, __d[child-1]);
+                    ptr = __c[child-1];
+                    flag = false; //Don't have to reshuffle data since it's at end
+                    delete __c[child];
+                }
+                move_to_end(__d, __d_s, child); //reshuffle data
+                ptr->insert(d); //insert data into pointer
+                for(size_t i = child; i < __d_s+1; i++){
+                    swap(__c[i], __c[i+1]);
+                } //organize the children to move the nullptrs out of bounds
+                return false; //escape sequence
+            }
             //sub scenario 2: Give the lone data of the parent
             //and then get a loan from parents
+            if(__d_s == 1){
+                T d;
+                swap(__d[0], d);
+                __d_s--;
+                __c[child]->insert(d);
+                return true;
+            }
+            if(DEBUG) cout << "UHHHH, shouldn't be here in code...\n";
+        }else{ //SCENARIO 4: Child was not a leaf
 
         }
     }

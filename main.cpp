@@ -7,16 +7,17 @@ using namespace std;
 int main()
 {
 
-    BTree<int> btr(2);
-    for(size_t i = 0; i < 10; i++)
+    BTree<int> btr(1);
+    for(size_t i = 0; i < 5; i++)
         btr.insert(i);
+    btr.insert(-1);
     btr.remove(7);
-    btr.remove(1);
-    btr.remove(0);
-    btr.remove(2);
-    btr.remove(5);
+    btr.remove(4);
     btr.print();
+//    btr.remove(3);
+    btr.remove(-1);
     btr.remove(3);
+    btr.remove(0);
     btr.print();
     btr.verify();
 //    btree_node<int>* node = new btree_node<int>(1);
