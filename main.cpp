@@ -1,21 +1,18 @@
 #include <iostream>
 #include "btree"
+#include <random>
 
 using namespace std;
 
 int main()
 {
 
-    BTree<int> btr(1);
-    btr.insert(1);
-    btr.insert(5);
-    btr.insert(10);
-    btr.insert(15);
-    btr.insert(20);
-    btr.insert(25);
-    btr.insert(30);
-    btr.insert(35);
+    BTree<int> btr(2);
+    for(size_t i = 0; i < 10; i++)
+        btr.insert(i);
+    btr.remove(7);
     btr.print();
+    btr.verify();
 //    btree_node<int>* node = new btree_node<int>(1);
 //    node->insert(1);
 //    node->insert(-5);
