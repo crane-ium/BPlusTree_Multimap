@@ -7,7 +7,7 @@
 #include <iomanip>
 #include "btree_functions.h"
 
-static const int DEBUG = 1;
+static const int DEBUG = 6;
 
 using namespace std;
 
@@ -19,10 +19,9 @@ struct btree_node{
     //BIG3
 
     //MEMBER FUNCTIONS
-    bool insert(const T& input);
+    bool insert(const T& input, bool force=false);
     bool remove(const T& input); //Removes a found input
     void print(size_t level=0); //prints the whole tree from the node
-    bool excess() const;
     bool verify() const;
     template<typename U>
     friend ostream& operator <<(ostream& outs, btree_node<U>& node);
@@ -33,12 +32,16 @@ struct btree_node{
     bool __dupes;
     T* __d; //data
     btree_node<T>** __c; //children
+    bool excess() const;
     bool is_leaf() const;
     void insert_child(btree_node<T> *node);
     bool rotate_left(size_t i); //rotates from a leaf sibling with spare data
     bool rotate_right(size_t i);
     //Checks all children to see if anyone can lend the empty sibling data
     bool rotate_check(size_t i);
+    void merge(btree_node<T>& node); //merges node into this
+    bool take_greatest(T& input); //Takes largest data from leaf in subtree
+    bool fix_empty_child(size_t i); //Checks child for emptiness and fixes
 };
 
 template<typename T>
@@ -52,8 +55,9 @@ btree_node<T>::btree_node(size_t min, bool dupes)
         __c[i] = nullptr;
 }
 template<typename T>
-bool btree_node<T>::insert(const T &input){
-    if(is_leaf()){ //check if there are children
+bool btree_node<T>::insert(const T &input, bool force){
+    //force: Place it into this node directly
+    if(force || is_leaf()){ //check if there are children
         //Then insert into this
         return insert_sorted(__d, __d_s, input, __dupes);
     }else{
@@ -198,20 +202,19 @@ template<typename T>
 void fix_excess(btree_node<T>*& node){
     //Used for fixing the root if it is too large
     if(node->__d_s > node->_min*2){
-        //Fix it!
+        //SPLIT
         btree_node<T>* new_root = new btree_node<T>(node->_min, node->__dupes);
         btree_node<T>* new_child = new btree_node<T>(node->_min, node->__dupes);
         //Give _min data elements, _min+1 children
-        for(size_t i = node->_min+1; i < node->__d_s; i++){ //give data
-            swap(node->__d[i], new_child->__d[i-node->_min-1]);
-        }
         for(size_t i = node->_min+1; i < node->__d_s+1; i++){ //give data
+            if(i < node->__d_s)
+                swap(node->__d[i], new_child->__d[i-node->_min-1]);
             swap(node->__c[i], new_child->__c[i-node->_min-1]);
         }
         new_child->__d_s = node->_min; //increase new_child values
         node->__d_s-=node->_min; //reduce old_child's values
         new_root->insert_child(node);
-        new_root->insert_child(new_child);
+        new_root->insert_child(new_child);\
         T d; //take the child's middle value and move it into parent
         swap(node->__d[node->_min], d);
         node->__d_s--;
@@ -222,6 +225,7 @@ void fix_excess(btree_node<T>*& node){
 template<typename T>
 void btree_node<T>::insert_child(btree_node<T>* node){
     //place the child at the end and then swap it until it's in place
+//    swap(__c[_min*2+1], node); //set the other to nullptr
     __c[_min*2+1] = node;
     for(size_t i = _min*2+1; i > 0; i--){
         if(__c[i-1] == nullptr || __c[i]->__d[0] < __c[i-1]->__d[0])
@@ -269,37 +273,58 @@ template<typename T>
 bool btree_node<T>::rotate_left(size_t i){
     if(__c[i+1]->__d_s < 2) //cannot take from a child with less than 2
         return false;
-    if(DEBUG>5) cout << "Rotate left\n";
     //Move the smallest element from the right child to the left
     T d; //temporary data
+    btree_node<T>* left = nullptr;
+    btree_node<T>* child = __c[i+1]; //PTR keep track of child
+    bool flag_leaf = child->is_leaf(); //Check if child is leaf
     //Take from the right child, then sort it and reduce size
-    swap(__c[i+1]->__d[0], d);
-    for(size_t j = 0; j < __c[i+1]->__d_s; j++){
-        swap(__c[i+1]->__d[j], __c[i+1]->__d[j+1]);
+    //Move a child over, too, if there are children
+    swap(child->__d[0], d);
+    if(!flag_leaf)
+        swap(child->__c[0], left); //set the old child to nullptr too
+    if(DEBUG>5) cout << "Rotate left\n";
+    for(size_t j = 0; j < child->__d_s+1; j++){
+        if(j < child->__d_s)
+            swap(child->__d[j], child->__d[j+1]);
+        if(!flag_leaf)
+            swap(child->__c[j], child->__c[j+1]);
     }
-    __c[i+1]->__d_s--;
+    child->__d_s--;
     //Next, swap that into current i in this
     swap(__d[i], d);
     //Next, insert  the data into the index's child
-    __c[i]->insert(d);
-    rotate_left(i-1);
+    __c[i]->insert(d, true);
+    __c[i]->insert_child(left);
+    if(i>0)
+        rotate_left(i-1);
     return true;
 }
 template<typename T>
-bool btree_node<T>::rotate_right(size_t i){
-    if(__c[i]->__d_s < 2) //cannot take from a child with less than 2
+bool btree_node<T>::rotate_right(size_t i){ //cannot take from a child with less than 2
+    if(__c[i]->__d_s < 2)
         return false;
-    if(DEBUG>5) cout << "rotating right\n";
-    //Move the largest element from the index's child to the right
+    //Move the smallest element from the right child to the left
     T d; //temporary data
+    btree_node<T>* right = nullptr;
+    btree_node<T>* child = __c[i]; //PTR keep track of child
+    size_t child_s = child->__d_s;
+    bool flag_leaf = child->is_leaf(); //Check if child is leaf
     //Take from the right child, then sort it and reduce size
-    swap(__c[i]->__d[__c[i]->__d_s-1], d); //End of array, pushed out of bounds
-    __c[i]->__d_s--;
+    //Move a child over, too, if there are children
+    swap(child->__d[child_s-1], d);
+    if(!flag_leaf)
+        swap(child->__c[child_s], right); //set the old child to nullptr too
+    if(DEBUG>5) cout << "Rotate right\n";
+    child->__d_s--;
     //Next, swap that into current i in this
     swap(__d[i], d);
     //Next, insert  the data into the index's child
-    __c[i+1]->insert(d);
-    rotate_right(i+1); //Recursive call. It should run until the index is filled
+    __c[i+1]->insert(d, true);
+    if(!flag_leaf)
+        __c[i+1]->insert_child(right);
+    if(i<__d_s-1)
+        rotate_right(i+1);
     return true;
 }
 template<typename T>
@@ -321,5 +346,32 @@ bool btree_node<T>::rotate_check(size_t i){
     }
 
     return flag_complete;
+}
+template<typename T>
+bool btree_node<T>::take_greatest(T &input){
+    if(is_leaf()){
+        //take the greatest from here!
+        swap(__d[__d_s-1], input);
+        __d_s--;
+        return true;
+    }else{
+        if(__c[__d_s]->take_greatest(input)){
+            //Since it took from this child leaf, then check it if it needs rotations
+            if(!rotate_check(__d_s)){
+                //Check if rotation check could not fix
+                //Then solution is to merge parent data into child
+            }
+        }
+    }
+}
+template<typename T>
+bool btree_node<T>::fix_empty_child(size_t i){
+    //Checks if a child __d_s is 0.
+    // If it is, then move the parent data down and merge
+    if(__c[i]->__d_s == 0){
+
+    }else{
+        return false;
+    }
 }
 #endif // BTREE_NODE_H
