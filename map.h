@@ -19,7 +19,7 @@ public:
     const V& at(const K& k) const;
     //MEMBER MODIFIERS
     bool insert(const K& k, const V& v);
-    bool insert(const Pair<K,V>& p);
+    bool insert(const Pair<K,V>& pair);
     bool erase(const K& k);
     void clear();
 
@@ -52,6 +52,13 @@ bool simple_map<K,V>::insert(const K &k, const V &v){
     return check;
 }
 template<typename K, typename V>
+bool simple_map<K,V>::insert(const Pair<K,V>& pair){
+    bool check = map.insert(pair);
+    if(check)
+        keycount++;
+    return check;
+}
+template<typename K, typename V>
 bool simple_map<K,V>::erase(const K &k){
     //Search for Pair<K,V>(K,V())
     Pair<K,V>* ptr = map.find(Pair<K,V>(k, V()));
@@ -73,9 +80,9 @@ template<typename K, typename V>
 V& simple_map<K,V>::at(const K &k){
     Pair<K,V>* ptr = map.find(k);
     if(ptr == nullptr){
-        ptr = new Pair<K,V>(k, V());
-        map.insert((*ptr));
-        cout << "made new\n";
+        map.insert(Pair<K,V>(k, V()));
+        //ptr = new Pair<K,V>(k,V()) then insert?
+        ptr = map.find(k);
     }
     return (*ptr).val;
 }

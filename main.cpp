@@ -1,5 +1,7 @@
 #include <iostream>
 #include "btree"
+#include "pair.h"
+#include "map.h"
 #include <random>
 #include <ctime>
 void test_BTree_auto(int tree_size=5000, int how_many=500, bool report=false);
@@ -14,62 +16,28 @@ struct tester{
     int val;
     tester(int v=0):val(v){}
 };
+void old_tests();
+void test_pair_v1();
 using namespace std;
 
 int main()
 {
-    srand(time(NULL));
-//    test_BTree_auto(1000, 10, false);
-    BTree<int> bt;
-    for(size_t i = 0; i < 10; i++)
-        bt.insert(i);
-    bt.get(5) = 10;
-    bt.get(10) = 33;
-    bt.print();
-    cout << bt.size() << endl;
-    cout << bt.verify() << endl;
-    bt.remove(33);
-    bt.print();
-    cout << bt.verify() << endl;
-    cout << bt.size() << endl;
-    vector<int> v;
-    v.push_back(1);
-    v.push_back(5);
-    v.push_back(10);
-    vector<int> v2;
-    v2.push_back(33);
-    v2.push_back(44);
-    v += v2;
-    cout << v << endl;
-    size_t st = 5;
-    int in = -5;
-    cout << (int(st) > in) << endl;
-    BTree<int> bt2(bt);
-    bt2.insert(33);
-    bt2.print();
-    BTree<int> bt3;
-    bt3 = bt2;
-    bt3.insert(111);
-    bt3.print();
-//    btree_node<int>* node = new btree_node<int>(1);
-//    for(int i = 0; i < 10; i++){
-//        bool check = node->insert(i);
-//        fix_excess(node);
-//    }
-//    node->print();
-////    node->__d_s--;
-//    node->remove(5);
-//    fix_excess(node);
-//    node->print();
-//    node->remove(8);
-//    fix_excess(node);
-//    node->print();
-//    node->remove(7);
-//    fix_excess(node);
-//    node->print();
-//    node->remove(3);
-//    fix_excess(node);
-//    node->print();
+    using pair = Pair<string, long long>;
+    simple_map<string, long long> map;
+    map.insert("foo", 111);
+    map.insert("bar",222);
+    map.insert("test",333);
+    cout << map << endl;
+    map.erase("bar");
+    map.erase("bar");
+    map.print();
+    cout << map.size() << endl;
+    map["bar"] = 1;
+    map.at("foo") = -111;
+    map["googly"] = 1235;
+    map.at("new") = 321;
+    map.insert(pair("pairinsert",99));
+    map.print();
     return 0;
 }
 
@@ -163,4 +131,58 @@ bool test_BTree_auto(int how_many, bool report){
     cout << bpt << endl;
 
     return true;
+}
+
+void old_tests(){
+
+    srand(time(NULL));
+//    test_BTree_auto(1000, 10, false);
+    BTree<int> bt;
+    for(size_t i = 0; i < 10; i++)
+        bt.insert(i);
+    bt.get(5) = 10;
+    bt.get(10) = 33;
+    bt.print();
+    cout << bt.size() << endl;
+    cout << bt.verify() << endl;
+    bt.remove(33);
+    bt.print();
+    cout << bt.verify() << endl;
+    cout << bt.size() << endl;
+    vector<int> v;
+    v.push_back(1);
+    v.push_back(5);
+    v.push_back(10);
+    vector<int> v2;
+    v2.push_back(33);
+    v2.push_back(44);
+    v += v2;
+    cout << v << endl;
+    size_t st = 5;
+    int in = -5;
+    cout << (int(st) > in) << endl;
+    BTree<int> bt2(bt);
+    bt2.insert(33);
+    bt2.print();
+    BTree<int> bt3;
+    bt3 = bt2;
+    bt3.insert(111);
+    bt3.print();
+}
+
+void test_pair_v1(){
+
+    typedef Pair<string, int> siPair;
+    Pair<string, int> pair("str",123);
+    Pair<string, int> pair2("str",321);
+    BTree<Pair<string, int> > btpair;
+    btpair.insert(siPair("new1", 111));
+    btpair.insert(siPair("random", 222));
+    btpair.insert(siPair("extra", 333));
+    btpair.insert(siPair("extr", 444));
+    btpair.get(siPair("extra", int())) = 555;
+
+    int ii = siPair("123", 666);
+    cout << ii << endl;
+    cout << btpair << endl;
 }
