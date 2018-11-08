@@ -19,8 +19,10 @@ public:
     bool exists(const T& input);
     T& get(const T& input);
 
+    void cleartree(); //Clears all but the root
     void print();
     bool verify() const;
+    bool empty() const;
     size_t size() const;
     template<typename U>
     friend std::ostream& operator <<(std::ostream& outs, BTree<U>& bt);
@@ -102,6 +104,18 @@ T& BTree<T>::get(const T &input){
 template<typename T>
 size_t BTree<T>::size() const{
     return __head->size();
+}
+template<typename T>
+bool BTree<T>::empty() const{
+    return !(bool)__head->__d_s;
+}
+
+template<typename T>
+void BTree<T>::cleartree(){
+    for(size_t i = 0; i < __head->__d_s+1; i++){
+        delete __head->__c[i];
+        __head->__c[i] = nullptr;
+    }
 }
 
 #endif // BTREE_H
