@@ -26,7 +26,7 @@ template<typename T>
 size_t first_ge(T* data, const size_t s, const T& target){
     //Return the first index that data[index] is >= target
     for(size_t i = 0; i < s; i++)
-        if(data[i] >= target)
+        if(target <= data[i])
             return i;
     return s;
 }
