@@ -25,6 +25,7 @@ struct btree_node{
     T *exists(const T& input); //Returns t/f if exists
     T& get_var(const T& input); //Returns address of data; Assumes exists
 
+    size_t size() const;
     void print(size_t level=0); //prints the whole tree from the node
     bool verify() const;
     template<typename U>
@@ -267,12 +268,12 @@ bool btree_node<T>::verify() const{
             }
         }
     }
-    if(child_count == 0 && flag_leaf || is_leaf())
+    if(child_count == 0 && !flag_leaf)
         return true;
     for(size_t i = 0; i < __d_s+1; i++){
         //Check that the children are placed accordingly to the data
         if(i < __d_s){
-            if(__d[i] < __c[i]->__d[0]){
+            if(__d[i] < __c[i]->__d[0] || __d[i] > __c[i+1]->__d[0]){
                 cout << "Index's child is greater than data\n";
                 return false;
             }
@@ -289,9 +290,9 @@ bool btree_node<T>::verify() const{
             cout << "Nullptr child\n";
             return false;
         }
-        return true;
 
     }
+    return true;
 }
 template<typename T>
 bool btree_node<T>::rotate_left(size_t i){
@@ -485,7 +486,20 @@ T* btree_node<T>::exists(const T& input){
         return nullptr;
 }
 template<typename T>
-T& get_var(const T& input){
-
+size_t btree_node<T>::size() const{
+    size_t count = 0;
+    if(!is_leaf()){
+        for(size_t i = 0; i < __d_s+1; i++){
+            count += __c[i]->size();
+        }
+    }
+    count += __d_s;
+    return count;
 }
+//template<typename T>
+//T& get_var(const T& input){
+//    T* val = exists(input);
+//    assert(val!=nullptr);
+//    return (*val);
+//}
 #endif // BTREE_NODE_H
