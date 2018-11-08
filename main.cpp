@@ -32,6 +32,15 @@ int main()
     bt.print();
     cout << bt.verify() << endl;
     cout << bt.size() << endl;
+    vector<int> v;
+    v.push_back(1);
+    v.push_back(5);
+    v.push_back(10);
+    vector<int> v2;
+    v2.push_back(33);
+    v2.push_back(44);
+    v += v2;
+    cout << v << endl;
 //    btree_node<int>* node = new btree_node<int>(1);
 //    for(int i = 0; i < 10; i++){
 //        bool check = node->insert(i);
