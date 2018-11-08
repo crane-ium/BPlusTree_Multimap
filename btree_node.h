@@ -21,6 +21,10 @@ struct btree_node{
     //MEMBER FUNCTIONS
     bool insert(const T& input, bool force=false);
     bool remove(const T& input); //Removes a found input
+
+    T *exists(const T& input); //Returns t/f if exists
+    T& get_var(const T& input); //Returns address of data; Assumes exists
+
     void print(size_t level=0); //prints the whole tree from the node
     bool verify() const;
     template<typename U>
@@ -28,21 +32,22 @@ struct btree_node{
     template<typename U>
     friend void fix_excess(btree_node<U>*& node);
 private:
-    size_t _min, __d_s/*, __c_s*/; //__d_s: datacount, __c_s: childrencount
+    size_t _min, __d_s/*, __c_s*/; //__d_s: datasize, __c_s: childsize
     bool __dupes;
     T* __d; //data
     btree_node<T>** __c; //children
-    bool excess() const;
-    bool is_leaf() const;
-    void insert_child(btree_node<T> *node);
+    bool excess() const; //Returns t/f if _data length > 2*_min
+    bool is_leaf() const; //Checks if it is a leaf
+    void insert_child(btree_node<T> *node); //Inserts a node
     bool rotate_left(size_t i); //rotates from a leaf sibling with spare data
-    bool rotate_right(size_t i);
+    bool rotate_right(size_t i); //rotates a data, and a child if not leaf
     //Checks all children to see if anyone can lend the empty sibling data
     bool rotate_check(size_t i);
     void merge(btree_node<T>* left, btree_node<T>* &right); //merges two nodes
     bool take_greatest(T& input); //Takes largest data from leaf in subtree
     bool take_smallest(T& input); //Takes smallest data from leaf in subtree
     bool fix_empty_child(size_t i); //Checks child for emptiness and fixes
+    //At __c[c_i], check whether to merge left or right
     bool merge_data_child(size_t c_i);
 };
 
@@ -408,21 +413,11 @@ bool btree_node<T>::fix_empty_child(size_t i){
     // If it is, then move the parent data down and merge
     btree_node<T>* child = __c[i];
     if(child->__d_s == 0){
-        if(i == __d_s){//this means the child is the far right
-            bool check = rotate_check(i);
-            if(check)
-                return true; //return it's fixed
-            check = merge_data_child(i);
-//            if(check)
-                return true;
-        }else{
-            bool check = rotate_check(i);
-            if(check)
-                return true; //return it's fixed
-            check = merge_data_child(i);
-//            if(check)
-                return true;
-        }
+        bool check = rotate_check(i);
+        if(check)
+            return true; //return it's fixed
+        check = merge_data_child(i);
+        return true;
     }else
         return false;
     //should never get here
@@ -478,5 +473,19 @@ void btree_node<T>::merge(btree_node<T>* left, btree_node<T>* &right){
     }
     delete right;
     right=nullptr;
+}
+template<typename T>
+T* btree_node<T>::exists(const T& input){
+    size_t i = first_ge(__d, __d_s, input);
+    if(__d[i] == input && i < __d_s)
+        return &__d[i];
+    else if(!is_leaf()){
+        return __c[i]->exists(input);
+    }else
+        return nullptr;
+}
+template<typename T>
+T& get_var(const T& input){
+
 }
 #endif // BTREE_NODE_H

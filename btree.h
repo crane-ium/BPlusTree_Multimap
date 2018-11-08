@@ -13,6 +13,10 @@ public:
     //MEMBER FUNCTIONS
     bool insert(const T& input);
     bool remove(const T& input);
+
+    bool exists(const T& input);
+    T& get(const T& input);
+
     void print();
     bool verify() const;
     template<typename U>
@@ -64,6 +68,11 @@ template<typename T>
 std::ostream& operator <<(std::ostream& outs, BTree<T>& bt){
     bt.print();
     return outs;
+}
+template<typename T>
+bool BTree<T>::exists(const T &input){
+
+    return (__head->exists(input) != nullptr);
 }
 
 #endif // BTREE_H

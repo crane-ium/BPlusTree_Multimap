@@ -19,15 +19,18 @@ using namespace std;
 int main()
 {
     srand(time(NULL));
-    test_BTree_auto(1000, 10, false);
-//    BTree<int> bt;
-//    for(size_t i = 0; i < 10; i++)
-//        bt.insert(i);
-//    for(size_t i = 0; i < 10; i++){
-//        bt.remove(rand()%10);
-//        bt.print();
-//        assert(bt.verify());
-//    }
+//    test_BTree_auto(1000, 10, false);
+    BTree<int> bt;
+    for(size_t i = 0; i < 10; i++)
+        bt.insert(i);
+    if(bt.exists(10))
+        cout << "Exists\n";
+    else
+        cout << "DNE\n";
+    if(bt.exists(5))
+        cout << "Exists\n";
+    else
+        cout << "DNE\n";
 //    btree_node<int>* node = new btree_node<int>(1);
 //    for(int i = 0; i < 10; i++){
 //        bool check = node->insert(i);
