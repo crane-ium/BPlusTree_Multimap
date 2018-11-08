@@ -49,4 +49,23 @@ void move_to_end(T* data, size_t& s, size_t i){
     }
     s--;
 }
+template<typename T>
+void copy_array(T a_new[], const T a_copy[], const size_t& s){
+    for(size_t i = 0; i < s; i++)
+        a_new[i] = a_copy[i];
+}
+template<typename T>
+void print_array(T arr[], const T& s){
+    for(size_t i = 0; i < s; i++){
+        cout <<  "[" << setw(4)  << setfill('0') << arr[i] << "] ";
+    }
+    cout << endl;
+}
+template<typename T>
+void delete_item(T data[], int& i, int& s, T& entry){
+    swap(entry, data[i]);
+    s--;
+    for(size_t i = i; i < s; i++)
+        swap(data[i], data[i+1]);
+}
 #endif // BTREE_FUNCTIONS_H

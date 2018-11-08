@@ -15,6 +15,8 @@ public:
     bool remove(const T& input);
     void print();
     bool verify() const;
+    template<typename U>
+    friend std::ostream& operator <<(std::ostream& outs, BTree<U>& bt);
 private:
     size_t _min;
     bool __dupes;
@@ -47,11 +49,18 @@ void BTree<T>::print(){
 }
 template<typename T>
 bool BTree<T>::verify() const{
+    cout << "Verifying\n";
     bool check = __head->verify();
     if(check)
         cout << "----VERIFIED----\n";
     else
         cout << "!!!!FAILED VERIFICATION!!!!\n";
+    return check;
+}
+template<typename T>
+std::ostream& operator <<(std::ostream& outs, BTree<T>& bt){
+    bt.print();
+    return outs;
 }
 
 #endif // BTREE_H

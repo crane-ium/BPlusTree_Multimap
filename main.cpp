@@ -18,6 +18,14 @@ using namespace std;
 int main()
 {
     test_BTree_auto(100, 5, false);
+//    BTree<int> bt;
+//    for(size_t i = 0; i < 10; i++)
+//        bt.insert(i);
+//    for(size_t i = 0; i < 10; i++){
+//        bt.remove(rand()%10);
+//        bt.print();
+//        assert(bt.verify());
+//    }
 //    btree_node<int>* node = new btree_node<int>(1);
 //    for(int i = 0; i < 10; i++){
 //        bool check = node->insert(i);
@@ -118,7 +126,7 @@ bool test_BTree_auto(int how_many, bool report){
 
 
         delete_item(a, r, size, deleted_list[deleted_size++]);
-        if (!bpt.is_valid()){
+        if (!bpt.verify()){
             cout<<setw(6)<<i<<" I N V A L I D   T R E E"<<endl;
             cout<<"Original Array: "; print_array(original, original_size);
             cout<<"Deleted Items : "; print_array(deleted_list, deleted_size);

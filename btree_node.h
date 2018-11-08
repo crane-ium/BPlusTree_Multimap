@@ -7,7 +7,7 @@
 #include <iomanip>
 #include "btree_functions.h"
 
-static const int DEBUG = 6;
+static const int DEBUG = 0;
 
 using namespace std;
 
@@ -27,7 +27,7 @@ struct btree_node{
     friend ostream& operator <<(ostream& outs, btree_node<U>& node);
     template<typename U>
     friend void fix_excess(btree_node<U>*& node);
-//private:
+private:
     size_t _min, __d_s/*, __c_s*/; //__d_s: datacount, __c_s: childrencount
     bool __dupes;
     T* __d; //data
@@ -139,7 +139,7 @@ bool btree_node<T>::remove(const T& input){
         if(__c[child]->__d_s > 0)
             return check;
         else{
-            if(DEBUG) cout << "Did it reach here??\n";
+            fix_empty_child(child);
         }
     }
 }
@@ -153,6 +153,7 @@ bool btree_node<T>::is_leaf() const{
 template<typename T>
 void btree_node<T>::print(size_t level){
     //PRINT BACKWARDS
+    cout << setfill(' ');
     if(!is_leaf()){
         //Print the first half of children
         for(size_t i = (__d_s); i > (__d_s)/2; i--)
@@ -235,38 +236,56 @@ void btree_node<T>::insert_child(btree_node<T>* node){
 template<typename T>
 bool btree_node<T>::verify() const{
     //Check children and data align
-    if(is_leaf()){
-        //check that there are no children
-        for(size_t i = 0; i < 2*_min+2; i++){
-            if(__c[i] != nullptr){
-                cout << "There is a child in a leaf\n";
+    bool flag_leaf = true;
+    size_t child_count = 0;
+    if(__d_s == 0){
+        if(DEBUG)
+            cout << "Verify: empty node\n";
+        return false;
+    }
+    for(size_t i = 0; i < 2*_min+2; i++){
+        if(i < __d_s+1){ //only count if it's within the range
+            if(__c[i]==nullptr && flag_leaf)
+                flag_leaf = false;
+            else if(__c[i] != nullptr && !flag_leaf){
+                if(DEBUG)
+                    cout << "not null child in leaf\n";
                 return false;
             }
+            if(__c[i]!=nullptr)
+                child_count++;
+        }else{
+            if(__c[i] != nullptr){
+                if(DEBUG)
+                    cout << "Verify: Child out of range\n";
+                return false;
+            }
+        }
+    }
+    if(child_count == 0 && flag_leaf || is_leaf())
+        return true;
+    for(size_t i = 0; i < __d_s+1; i++){
+        //Check that the children are placed accordingly to the data
+        if(i < __d_s){
+            if(__d[i] < __c[i]->__d[0]){
+                cout << "Index's child is greater than data\n";
+                return false;
+            }
+        }else{ //check last child
+            if(__d[i-1] > __c[i]->__d[0]){
+                cout << "Last child is smaller than data\n";
+                return false;
+            }
+        }
+        try{
+            if(!__c[i]->verify()) //if there is a nullptr in __c, then it will crash
+                return false;
+        }catch(...){
+            cout << "Nullptr child\n";
+            return false;
         }
         return true;
-    }else{
-        for(size_t i = 0; i < __d_s+1; i++){
-            //Check that the children are placed accordingly to the data
-            if(i < __d_s){
-                if(__d[i] < __c[i]->__d[0]){
-                    cout << "Index's child is greater than data\n";
-                    return false;
-                }
-            }else{ //check last child
-                if(__d[i-1] > __c[i]->__d[0]){
-                    cout << "Last child is smaller than data\n";
-                    return false;
-                }
-            }
-            try{
-                if(!__c[i]->verify()) //if there is a nullptr in __c, then it will crash
-                    return false;
-            }catch(...){
-                cout << "Nullptr child\n";
-                return false;
-            }
-            return true;
-        }
+
     }
 }
 template<typename T>
