@@ -24,6 +24,19 @@ public:
     bool verify() const;
     bool empty() const;
     size_t size() const;
+    void operator ()(const size_t& min, const bool& dupes) const{
+        if(is_leaf()){
+            if(min > _min){
+                //simple allowing of resizing
+                _min = min;
+                __head->_min = min;
+            }
+            if(__dupes == false){ //Allow from false->true only (for simple feature)
+                __dupes = dupes;
+                __head->__dupes = dupes;
+            }
+        }
+    }
     template<typename U>
     friend std::ostream& operator <<(std::ostream& outs, BTree<U>& bt);
 private:
