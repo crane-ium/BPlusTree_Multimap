@@ -19,6 +19,7 @@ public:
 
     void print();
     bool verify() const;
+    size_t size() const;
     template<typename U>
     friend std::ostream& operator <<(std::ostream& outs, BTree<U>& bt);
 private:
@@ -71,8 +72,17 @@ std::ostream& operator <<(std::ostream& outs, BTree<T>& bt){
 }
 template<typename T>
 bool BTree<T>::exists(const T &input){
-
     return (__head->exists(input) != nullptr);
+}
+template<typename T>
+T& BTree<T>::get(const T &input){
+    T* val = __head->exists(input);
+    assert(val!=nullptr);
+    return (*val);
+}
+template<typename T>
+size_t BTree<T>::size() const{
+    return __head->size();
 }
 
 #endif // BTREE_H

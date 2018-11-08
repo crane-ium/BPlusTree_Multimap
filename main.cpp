@@ -23,14 +23,15 @@ int main()
     BTree<int> bt;
     for(size_t i = 0; i < 10; i++)
         bt.insert(i);
-    if(bt.exists(10))
-        cout << "Exists\n";
-    else
-        cout << "DNE\n";
-    if(bt.exists(5))
-        cout << "Exists\n";
-    else
-        cout << "DNE\n";
+    bt.get(5) = 10;
+    bt.get(10) = 33;
+    bt.print();
+    cout << bt.size() << endl;
+    cout << bt.verify() << endl;
+    bt.remove(33);
+    bt.print();
+    cout << bt.verify() << endl;
+    cout << bt.size() << endl;
 //    btree_node<int>* node = new btree_node<int>(1);
 //    for(int i = 0; i < 10; i++){
 //        bool check = node->insert(i);
