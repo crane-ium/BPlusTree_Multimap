@@ -17,7 +17,7 @@ struct btree_node{
     //base ctor
     btree_node(size_t min=1, bool dupes=false);
     //BIG3
-
+    ~btree_node();
     //MEMBER FUNCTIONS
     bool insert(const T& input, bool force=false);
     bool remove(const T& input); //Removes a found input
@@ -39,9 +39,11 @@ struct btree_node{
     bool rotate_right(size_t i);
     //Checks all children to see if anyone can lend the empty sibling data
     bool rotate_check(size_t i);
-    void merge(btree_node<T>& node); //merges node into this
+    void merge(btree_node<T>* left, btree_node<T>* &right); //merges two nodes
     bool take_greatest(T& input); //Takes largest data from leaf in subtree
+    bool take_smallest(T& input); //Takes smallest data from leaf in subtree
     bool fix_empty_child(size_t i); //Checks child for emptiness and fixes
+    bool merge_data_child(size_t c_i);
 };
 
 template<typename T>
@@ -53,6 +55,15 @@ btree_node<T>::btree_node(size_t min, bool dupes)
     __c = new btree_node<T>*[_min*2+2];
     for(size_t i = 0; i < _min*2+2; i++)
         __c[i] = nullptr;
+}
+template<typename T>
+btree_node<T>::~btree_node(){
+    delete[] __d;
+    for(size_t i = 0; i < _min*2+2; i++){
+        if(__c[i] != nullptr && i > __d_s)
+            if(DEBUG) cout << "There was a non-null child out of place\n";
+        delete __c[i]; //delete all children
+    }
 }
 template<typename T>
 bool btree_node<T>::insert(const T &input, bool force){
@@ -79,7 +90,7 @@ bool btree_node<T>::insert(const T &input, bool force){
             }
             new_child->__d_s = _min; //increase new_child values
             __c[child]->__d_s-=_min; //reduce old_child's values
-            T d; //take the child's middle value and move it into parent
+            T d=T(); //take the child's middle value and move it into parent
             swap(__c[child]->__d[_min], d);
             __c[child]->__d_s--;
             insert_sorted(__d, __d_s, d, __dupes);
@@ -97,64 +108,100 @@ bool btree_node<T>::remove(const T& input){
     if(is_there(__d, __d_s, input)){
         //Found it, remove it. Then deal with consequences
         size_t d_i = index_of(__d, __d_s, input);
-        for(size_t i = d_i; i < __d_s; i++){ //sort it out of bounds
-            swap(__d[i], __d[i+1]);
+        if(DEBUG) cout << "Found " << input << " at " << d_i << endl;
+        if(!is_leaf()){
+            cout << "tested\n";
+            //Then take from it's greatest subtree
+            if(__c[d_i+1]->__d_s > __c[d_i]->__d_s){
+                __c[d_i+1]->take_smallest(__d[d_i]);
+                    if(__c[d_i+1]->__d_s == 0)
+                        fix_empty_child(d_i+1);
+            }else{
+                __c[d_i]->take_greatest(__d[d_i]);
+                if(__c[d_i]->__d_s == 0)
+                    fix_empty_child(d_i);
+            }
+        }else{
+            for(size_t i = d_i; i < __d_s; i++){ //sort it out of bounds
+                swap(__d[i], __d[i+1]);
+            }
+            __d_s--;
         }
-        __d_s--;
+        if(DEBUG) cout << "Remove: returning\n";
         return true;
     }else if(is_leaf()){
+        //Didn't find, exit
         return false;
     }else{
+//        //Get child to search, then recursive remove on child
         size_t child = first_ge(__d, __d_s, input);
-        bool check = __c[child]->remove(input);
-        if(!check) //it wasn't found or nothing to do. Return to exit
-            return false;
-        //else we check if anything needs management
-        //Scenario 1: Child is leaf with spares
-        if(__c[child]->is_leaf() && __c[child]->__d_s > 0)
-            return false; //It's done, we're good
-        else if(__c[child]->is_leaf()){
-            //Scenario 2: Empty leaf
-            bool r_check = rotate_check(child);
-            if(r_check)
-                return false;
-            //Scenario 3: No siblings
-            //Sub scenario 1: Give + merge with data of parent
-            if(__d_s > 1){
-                T d;
-                btree_node<T>* ptr;
-                bool flag = true;
-                if(child < __d_s){
-                    swap(d, __d[child]); //take the data
-                    ptr = __c[child+1];
-                    delete __c[child];
-                    __c[child] = nullptr;
-                }else{
-                    swap(d, __d[child-1]);
-                    ptr = __c[child-1];
-                    flag = false; //Don't have to reshuffle data since it's at end
-                    delete __c[child];
-                }
-                move_to_end(__d, __d_s, child); //reshuffle data
-                ptr->insert(d); //insert data into pointer
-                for(size_t i = child; i < __d_s+1; i++){
-                    swap(__c[i], __c[i+1]);
-                } //organize the children to move the nullptrs out of bounds
-                return false; //escape sequence
-            }
-            //sub scenario 2: Give the lone data of the parent
-            //and then get a loan from parents
-            if(__d_s == 1){
-                T d;
-                swap(__d[0], d);
-                __d_s--;
-                __c[child]->insert(d);
-                return true;
-            }
-            if(DEBUG) cout << "UHHHH, shouldn't be here in code...\n";
-        }else{ //SCENARIO 4: Child was not a leaf
-
+        bool check = __c[child]->remove(input); //check checks if remove happened
+        if(__c[child]->__d_s > 0)
+            return check;
+        else{
+            if(DEBUG) cout << "Did it reach here??\n";
         }
+//        if(!check || __c[child]->__d_s > 0) //it wasn't found or nothing to do. Return to exit
+//            return false;
+//        //Scenario 1:
+//        //If child is empty, check if any siblings can lend
+//        bool r_check = rotate_check(child);
+//        if(r_check) //then rotation fixed it
+//            return false;
+//        //else we check if anything needs management
+////        if(__c[child]->is_leaf() && __c[child]->__d_s > 0)
+////            return false; //It's done, we're good
+////        else
+//        if(__c[child]->is_leaf()){
+//            //Scenario 2: Empty leaf
+////            bool r_check = rotate_check(child);
+////            if(r_check)
+////                return false;
+//            //Scenario 3: No siblings, so give + merge with data of parent
+//            //Sub scenario 1: Give + merge with data of parent
+//            if(__d_s > 1){
+//                T d=T();
+//                btree_node<T>* ptr;
+//                bool flag = true;
+//                if(child < __d_s){
+//                    swap(d, __d[child]); //take the data
+//                    ptr = __c[child+1];
+//                    delete __c[child];
+//                    __c[child] = nullptr;
+//                }else{
+//                    swap(d, __d[child-1]);
+//                    ptr = __c[child-1];
+//                    flag = false; //Don't have to reshuffle data since it's at end
+//                    delete __c[child];
+//                }
+//                move_to_end(__d, __d_s, child); //reshuffle data
+//                ptr->insert(d); //insert data into pointer
+//                for(size_t i = child; i < __d_s+1; i++){
+//                    swap(__c[i], __c[i+1]);
+//                } //organize the children to move the nullptrs out of bounds
+//                return false; //escape sequence
+//            }
+//            //sub scenario 2: Give the lone data of the parent
+//            //and then get a loan from parents
+//            if(__d_s == 1){
+//                T d=T();
+//                swap(__d[0], d);
+//                __d_s--;
+//                __c[child]->insert(d);
+//                return true;
+//            }
+//            if(DEBUG) cout << "UHHHH, shouldn't be here in code...\n";
+
+//        }else{ //SCENARIO 4: Child was not a leaf
+//            //Try and steal from child's children
+
+////            bool r_check = rotate_check(child);
+////            if(r_check)
+////                return false; //Work complete by rotation, exit
+////            //Else check if u can steal from the child's children
+
+//        }
+
     }
 }
 template<typename T>
@@ -200,6 +247,20 @@ ostream& operator <<(ostream& outs, btree_node<T>& node){
 }
 template<typename T>
 void fix_excess(btree_node<T>*& node){
+    //Also check that the root isn't empty
+    if(node->__d_s == 0){
+        //if root is empty, it needs to be filled
+        //The root MUST've given it's data to a child, since
+        // if it were removed, it would've taken the greatest_data
+        //Therefore one child has __d_s == 1 AND only one child
+        btree_node<T>* temp = node;
+        btree_node<T>* child = node->__c[0];
+        if(!node->is_leaf()){
+            node = child;
+            temp->__c[0] = nullptr;
+            delete temp;
+        }
+    }
     //Used for fixing the root if it is too large
     if(node->__d_s > node->_min*2){
         //SPLIT
@@ -215,7 +276,7 @@ void fix_excess(btree_node<T>*& node){
         node->__d_s-=node->_min; //reduce old_child's values
         new_root->insert_child(node);
         new_root->insert_child(new_child);\
-        T d; //take the child's middle value and move it into parent
+        T d=T(); //take the child's middle value and move it into parent
         swap(node->__d[node->_min], d);
         node->__d_s--;
         insert_sorted(new_root->__d, new_root->__d_s, d, node->__dupes);
@@ -274,7 +335,7 @@ bool btree_node<T>::rotate_left(size_t i){
     if(__c[i+1]->__d_s < 2) //cannot take from a child with less than 2
         return false;
     //Move the smallest element from the right child to the left
-    T d; //temporary data
+    T d=T(); //temporary data
     btree_node<T>* left = nullptr;
     btree_node<T>* child = __c[i+1]; //PTR keep track of child
     bool flag_leaf = child->is_leaf(); //Check if child is leaf
@@ -305,7 +366,7 @@ bool btree_node<T>::rotate_right(size_t i){ //cannot take from a child with less
     if(__c[i]->__d_s < 2)
         return false;
     //Move the smallest element from the right child to the left
-    T d; //temporary data
+    T d=T(); //temporary data
     btree_node<T>* right = nullptr;
     btree_node<T>* child = __c[i]; //PTR keep track of child
     size_t child_s = child->__d_s;
@@ -353,25 +414,120 @@ bool btree_node<T>::take_greatest(T &input){
         //take the greatest from here!
         swap(__d[__d_s-1], input);
         __d_s--;
+        if(DEBUG) cout << "Took greatest " << input << endl;
         return true;
     }else{
-        if(__c[__d_s]->take_greatest(input)){
-            //Since it took from this child leaf, then check it if it needs rotations
-            if(!rotate_check(__d_s)){
-                //Check if rotation check could not fix
-                //Then solution is to merge parent data into child
-            }
+        btree_node<T>* child = __c[__d_s];
+        bool check = child->take_greatest(input); //recursive call
+        if(child->__d_s == 0){
+            bool check = fix_empty_child(__d_s);
+            if(DEBUG) cout << "takegreatest: fix_empty_child = " << check << endl;
         }
+        return true;
+    }
+}
+template<typename T>
+bool btree_node<T>::take_smallest(T &input){
+    if(is_leaf()){
+        //take the smallest from here!
+        swap(__d[0], input);
+        move_to_end(__d, __d_s, 0);
+        if(DEBUG) cout << "Took smallest " << input << endl;
+        return true;
+    }else{
+        btree_node<T>* child = __c[0];
+        bool check = child->take_smallest(input); //recursive call
+        if(child->__d_s == 0){
+
+            bool check = fix_empty_child(0);
+            if(DEBUG) cout << "take_smallest: fix_empty_child = " << check << endl;
+//            bool r_check = rotate_check(0);
+//            if(r_check)
+//                return false;
+//            else{
+//                //rotate couldn't fix the empty child
+//                //Instead, go with one less child and merge with parent data
+//                if(DEBUG) cout << "Recursing in take_smallest\n";
+//                merge_data_child(0);
+//            }
+        }
+        return true;
     }
 }
 template<typename T>
 bool btree_node<T>::fix_empty_child(size_t i){
     //Checks if a child __d_s is 0.
     // If it is, then move the parent data down and merge
-    if(__c[i]->__d_s == 0){
-
-    }else{
+    btree_node<T>* child = __c[i];
+    if(child->__d_s == 0){
+        if(i == __d_s){//this means the child is the far right
+            bool check = rotate_check(i);
+            if(check)
+                return true; //return it's fixed
+            check = merge_data_child(i);
+//            if(check)
+                return true;
+        }else{
+            bool check = rotate_check(i);
+            if(check)
+                return true; //return it's fixed
+            check = merge_data_child(i);
+//            if(check)
+                return true;
+        }
+    }else
         return false;
+    //should never get here
+    cout << "Hit end of " << __FUNCTION__<< endl;
+    assert(false);
+}
+template<typename T>
+bool btree_node<T>::merge_data_child(size_t c_i){
+    //Moves _data[d_i] into a child and deletes __c[c_i]
+    if(c_i < __d_s){
+        if(DEBUG) cout << "merge_data_child: merge right\n";
+        T d=T();
+        swap(d, __d[c_i]);
+        __c[c_i]->insert(d, true);
+        merge(__c[c_i+1], __c[c_i]); // merge into the right child
+        for(size_t i = c_i; i < __d_s; i++){ //Swap empty data to the right
+            if(i < __d_s - 1)
+                swap(__d[i], __d[i+1]);
+            swap(__c[i], __c[i+1]);
+        }
+        __d_s--;
+        return true;
+    }else if(c_i == __d_s){
+        if(DEBUG) cout << "merge_data_child: merge left\n";
+        //means it's far right child
+        //Special case: Instead of merging data into the right
+        // merge into the left
+        T d=T();
+        swap(d, __d[__d_s-1]);
+        __d_s--;
+        __c[c_i]->insert(d, true);
+        merge(__c[c_i-1], __c[c_i]);
+        return true;
     }
+    if(DEBUG) cout << "Something failed in merge_data_child\n";
+    return false;
+}
+template<typename T>
+void btree_node<T>::merge(btree_node<T>* left, btree_node<T>* &right){
+    //Merges the right into the left
+    //Assumes the right has same # of data as children
+    if(DEBUG) cout << "merge()\n";
+    T d=T();
+    btree_node<T>* temp = nullptr;
+    for(size_t i = 0; i < right->__d_s; i++){
+        temp = right->__c[i];
+        right->__c[i] = nullptr;
+        left->insert_child(temp);
+        if(i<right->__d_s){
+            swap(d, right->__d[i]);
+            left->insert(d, true);
+        }
+    }
+    right=nullptr;
 }
 #endif // BTREE_NODE_H

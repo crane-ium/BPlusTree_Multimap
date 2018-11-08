@@ -38,7 +38,7 @@ bool BTree<T>::remove(const T &input){
     //Returns false if no found input;
     bool check = __head->remove(input);
     //Check if __head needs reorganizing too
-
+    fix_excess(__head);
     return check;
 }
 template<typename T>
