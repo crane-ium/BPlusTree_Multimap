@@ -17,15 +17,16 @@ public:
     bool remove(const T& input);
 
     bool exists(const T& input);
+    T* find(const T& input);
     T& get(const T& input);
 
     void cleartree(); //Clears all but the root
-    void print();
+    void print() const;
     bool verify() const;
     bool empty() const;
     size_t size() const;
-    void operator ()(const size_t& min, const bool& dupes) const{
-        if(is_leaf()){
+    void operator ()(const size_t& min, const bool& dupes){
+        if(__head->is_leaf()){
             if(min > _min){
                 //simple allowing of resizing
                 _min = min;
@@ -38,7 +39,7 @@ public:
         }
     }
     template<typename U>
-    friend std::ostream& operator <<(std::ostream& outs, BTree<U>& bt);
+    friend std::ostream& operator <<(std::ostream& outs, const BTree<U>& bt);
 private:
     size_t _min;
     bool __dupes;
@@ -87,7 +88,7 @@ bool BTree<T>::remove(const T &input){
     return check;
 }
 template<typename T>
-void BTree<T>::print(){
+void BTree<T>::print() const{
     __head->print();
 }
 template<typename T>
@@ -100,13 +101,17 @@ bool BTree<T>::verify() const{
     return check;
 }
 template<typename T>
-std::ostream& operator <<(std::ostream& outs, BTree<T>& bt){
+std::ostream& operator <<(std::ostream& outs, const BTree<T>& bt){
     bt.print();
     return outs;
 }
 template<typename T>
 bool BTree<T>::exists(const T &input){
     return (__head->exists(input) != nullptr);
+}
+template<typename T>
+T* BTree<T>::find(const T &input){
+    return __head->exists(input);
 }
 template<typename T>
 T& BTree<T>::get(const T &input){
@@ -125,7 +130,8 @@ bool BTree<T>::empty() const{
 
 template<typename T>
 void BTree<T>::cleartree(){
-    for(size_t i = 0; i < __head->__d_s+1; i++){
+    __head->__d_s = 0; //delete all children
+    for(size_t i = 0; i < __head->_min*2+2; i++){
         delete __head->__c[i];
         __head->__c[i] = nullptr;
     }

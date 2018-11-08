@@ -28,7 +28,7 @@ struct btree_node{
     T& get_var(const T& input); //Returns address of data; Assumes exists
 
     size_t size() const;
-    void print(size_t level=0); //prints the whole tree from the node
+    void print(size_t level=0) const; //prints the whole tree from the node
     bool verify() const;
     template<typename U>
     friend ostream& operator <<(ostream& outs, const btree_node<U>& node);
@@ -197,7 +197,7 @@ bool btree_node<T>::is_leaf() const{
         return false;
 }
 template<typename T>
-void btree_node<T>::print(size_t level){
+void btree_node<T>::print(size_t level) const{
     //PRINT BACKWARDS
     cout << setfill(' ');
     if(!is_leaf()){
