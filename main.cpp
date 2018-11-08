@@ -44,6 +44,13 @@ int main()
     size_t st = 5;
     int in = -5;
     cout << (int(st) > in) << endl;
+    BTree<int> bt2(bt);
+    bt2.insert(33);
+    bt2.print();
+    BTree<int> bt3;
+    bt3 = bt2;
+    bt3.insert(111);
+    bt3.print();
 //    btree_node<int>* node = new btree_node<int>(1);
 //    for(int i = 0; i < 10; i++){
 //        bool check = node->insert(i);

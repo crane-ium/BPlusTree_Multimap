@@ -10,6 +10,8 @@ public:
     BTree(size_t min=1, bool dupes=false);
     //BIG3
     ~BTree();
+    BTree(const BTree<T>& copy);
+    BTree<T>& operator =(const BTree<T>& copy);
     //MEMBER FUNCTIONS
     bool insert(const T& input);
     bool remove(const T& input);
@@ -35,6 +37,23 @@ BTree<T>::BTree(size_t min, bool dupes): _min(min), __dupes(dupes){
 template<typename T>
 BTree<T>::~BTree(){
     delete __head;
+}
+template<typename T>
+BTree<T>::BTree(const BTree<T>& copy){
+    /*this->*/
+    _min = copy._min;
+    __dupes = copy.__dupes;
+    __head = new btree_node<T>((*copy.__head));
+}
+template<typename T>
+BTree<T>& BTree<T>::operator =(const BTree<T>& copy){
+    if(this == (&copy))
+        return (*this);
+    BTree temp(copy);
+    swap(_min, temp._min);
+    swap(__dupes, temp.__dupes);
+    swap(__head, temp.__head);
+    return (*this);
 }
 template<typename T>
 bool BTree<T>::insert(const T &input){
