@@ -2,6 +2,8 @@
 #define BTREE_FUNCTIONS_H
 
 #include <cstdlib>
+#include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -67,5 +69,23 @@ void delete_item(T data[], int& i, int& s, T& entry){
     s--;
     for(size_t i = i; i < s; i++)
         swap(data[i], data[i+1]);
+}
+template<typename T>
+ostream& operator <<(ostream& outs, const vector<T>& data){
+    outs << "{";
+    for(size_t i = 0; i < data.size(); i++){
+        outs << data[i];
+        if(i < data.size()-1)
+            outs << ", ";
+    }
+    outs << "}";
+    return outs;
+}
+template<typename T>
+vector<T>& operator +=(vector<T>& left, vector<T>& right){
+    for(size_t i = 0; i < right.size(); i++){
+        left.push_back(right[i]);
+    }
+    return left;
 }
 #endif // BTREE_FUNCTIONS_H
