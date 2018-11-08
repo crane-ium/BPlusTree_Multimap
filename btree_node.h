@@ -147,6 +147,7 @@ bool btree_node<T>::remove(const T& input){
         else{
             fix_empty_child(child);
         }
+        return check;
     }
 }
 template<typename T>
@@ -363,7 +364,7 @@ bool btree_node<T>::rotate_check(size_t i){
             break;
         }
     }
-    for(int j = i; j < __d_s; j++){
+    for(int j = i; j < int(__d_s); j++){
         if(rotate_left(j)){
             flag_complete = true;
             break;
@@ -382,7 +383,7 @@ bool btree_node<T>::take_greatest(T &input){
         return true;
     }else{
         btree_node<T>* child = __c[__d_s];
-        bool check = child->take_greatest(input); //recursive call
+        child->take_greatest(input); //recursive call
         if(child->__d_s == 0){
             bool check = fix_empty_child(__d_s);
             if(DEBUG) cout << "takegreatest: fix_empty_child = " << check << endl;
@@ -400,7 +401,7 @@ bool btree_node<T>::take_smallest(T &input){
         return true;
     }else{
         btree_node<T>* child = __c[0];
-        bool check = child->take_smallest(input); //recursive call
+        child->take_smallest(input); //recursive call
         if(child->__d_s == 0){
             bool check = fix_empty_child(0);
             if(DEBUG) cout << "take_smallest: fix_empty_child = " << check << endl;

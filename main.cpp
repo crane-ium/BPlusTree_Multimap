@@ -41,6 +41,9 @@ int main()
     v2.push_back(44);
     v += v2;
     cout << v << endl;
+    size_t st = 5;
+    int in = -5;
+    cout << (int(st) > in) << endl;
 //    btree_node<int>* node = new btree_node<int>(1);
 //    for(int i = 0; i < 10; i++){
 //        bool check = node->insert(i);
