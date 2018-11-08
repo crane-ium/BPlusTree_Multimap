@@ -9,7 +9,7 @@ class BTree{
 public:
     BTree(size_t min=1, bool dupes=false);
     //BIG3
-
+    ~BTree();
     //MEMBER FUNCTIONS
     bool insert(const T& input);
     bool remove(const T& input);
@@ -26,6 +26,10 @@ private:
 template<typename T>
 BTree<T>::BTree(size_t min, bool dupes): _min(min), __dupes(dupes){
     __head = new btree_node<T>(min, dupes);
+}
+template<typename T>
+BTree<T>::~BTree(){
+    delete __head;
 }
 template<typename T>
 bool BTree<T>::insert(const T &input){
@@ -49,12 +53,11 @@ void BTree<T>::print(){
 }
 template<typename T>
 bool BTree<T>::verify() const{
-    cout << "Verifying\n";
     bool check = __head->verify();
-    if(check)
-        cout << "----VERIFIED----\n";
-    else
-        cout << "!!!!FAILED VERIFICATION!!!!\n";
+//    if(check)
+//        cout << "----VERIFIED----\n";
+//    else
+//        cout << "!!!!FAILED VERIFICATION!!!!\n";
     return check;
 }
 template<typename T>

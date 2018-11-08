@@ -58,6 +58,7 @@ btree_node<T>::btree_node(size_t min, bool dupes)
 }
 template<typename T>
 btree_node<T>::~btree_node(){
+    if(DEBUG) cout << "-----------------Deleting " << __d[0] << endl;
     delete[] __d;
     for(size_t i = 0; i < _min*2+2; i++){
         if(__c[i] != nullptr && i > __d_s)
@@ -108,9 +109,8 @@ bool btree_node<T>::remove(const T& input){
     if(is_there(__d, __d_s, input)){
         //Found it, remove it. Then deal with consequences
         size_t d_i = index_of(__d, __d_s, input);
-        if(DEBUG) cout << "Found " << input << " at " << d_i << endl;
+        if(DEBUG) cout << "Remove: Found " << input << " at " << d_i << endl;
         if(!is_leaf()){
-            cout << "tested\n";
             //Then take from it's greatest subtree
             if(__c[d_i+1]->__d_s > __c[d_i]->__d_s){
                 __c[d_i+1]->take_smallest(__d[d_i]);
@@ -127,7 +127,7 @@ bool btree_node<T>::remove(const T& input){
             }
             __d_s--;
         }
-        if(DEBUG) cout << "Remove: returning\n";
+//        if(DEBUG) cout << "Remove: returning\n";
         return true;
     }else if(is_leaf()){
         //Didn't find, exit
@@ -476,6 +476,7 @@ void btree_node<T>::merge(btree_node<T>* left, btree_node<T>* &right){
             left->insert(d, true);
         }
     }
+    delete right;
     right=nullptr;
 }
 #endif // BTREE_NODE_H

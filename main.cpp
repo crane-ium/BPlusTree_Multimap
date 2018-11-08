@@ -1,6 +1,7 @@
 #include <iostream>
 #include "btree"
 #include <random>
+#include <ctime>
 void test_BTree_auto(int tree_size=5000, int how_many=500, bool report=false);
 bool test_BTree_auto(int how_many, bool report=true);
 int Random(int lo, int hi)
@@ -17,7 +18,8 @@ using namespace std;
 
 int main()
 {
-    test_BTree_auto(100, 5, false);
+    srand(time(NULL));
+    test_BTree_auto(1000, 10, false);
 //    BTree<int> bt;
 //    for(size_t i = 0; i < 10; i++)
 //        bt.insert(i);
@@ -61,7 +63,6 @@ void test_BTree_auto(int tree_size, int how_many, bool report){
             verified = false;
             return;
         }
-
     }
     cout<<"**************************************************************************"<<endl;
     cout<<"**************************************************************************"<<endl;
@@ -104,6 +105,7 @@ bool test_BTree_auto(int how_many, bool report){
         bpt.insert(a[i]);
 
     }
+//    bpt.print();
     if (report){
         cout<<"========================================================"<<endl;
         cout<<"  "<<endl;
@@ -133,9 +135,9 @@ bool test_BTree_auto(int how_many, bool report){
             cout<<endl<<endl<<bpt<<endl<<endl;
             return false;
         }
-
     }
     if (report) cout<<" V A L I D    T R E E"<<endl;
+    cout << bpt << endl;
 
     return true;
 }
