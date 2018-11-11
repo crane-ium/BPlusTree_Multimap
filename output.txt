@@ -134,6 +134,7 @@ Size: 10 | Valid Tree: True
                              [(1: 2)]
                                             [(0: 0)]
 Size: 15 | Valid Tree: True
+map3[3]: 6
 --Complete Tests--
 
 -------- MULTIMAP ---------
@@ -381,6 +382,7 @@ Size: 10 | Valid Tree: True
                              [(1: {2, 3, 101})]
                                             [(0: {0, 1, 100})]
 Size: 15 | Valid Tree: True
+map3[3]: {6, 7, 103}
 --Complete Tests--
 
 Press <RETURN> to close this window...

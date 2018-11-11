@@ -41,7 +41,8 @@ multimap<K,V>::multimap()
 
 }
 template<typename K, typename V>
-multimap<K,V>::multimap(const multimap<K,V>& copy){
+multimap<K,V>::multimap(const multimap<K,V>& copy)
+    : simple_map<K, vector<V> >(){
     __map = copy.__map;
     this->__keys = copy.__keys;
 }
@@ -69,13 +70,10 @@ template<typename K, typename V>
 bool multimap<K,V>::insert(const K& k, const V& v){
     //Inserts a key + value
     bool check = __map.insert(MPair<K,V>(k));
-    cout << "Inserting\n";
-    __map.print();
     if(check)
         this->__keys++;
     MPair<K,V>* ptr = __map.find(MPair<K,V>(k));
     ptr->vec += v;
-    cout << "Done insert\n";
     return check;
 }
 template<typename K, typename V>

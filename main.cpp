@@ -165,6 +165,8 @@ void multimap_test1(){
         m3[i] += to_string(i);
     m3.print();
     m3.print_data();
+    //Using it directly into cout
+    cout << "map3[3]: " <<  m3[3] << endl;
     cout << "--Complete Tests--\n\n";
 }
 

@@ -13,7 +13,7 @@ using namespace std;
 
 template<typename T>
 struct btree_node{
-    enum node_type { root, parent, child};
+    enum class node_type { root, parent, child};
     template<typename U> friend class BTree; //give BTree access
     //base ctor
     btree_node(size_t min=1, bool dupes=false);
@@ -30,7 +30,7 @@ struct btree_node{
 
     size_t size() const;
     void print(size_t level=0) const; //prints the whole tree from the node
-    bool verify(node_type nt=root) const;
+    bool verify(node_type nt=node_type::root) const;
     template<typename U>
     friend ostream& operator <<(ostream& outs, const btree_node<U>& node);
     template<typename U>
@@ -288,7 +288,7 @@ bool btree_node<T>::verify(node_type nt) const{
     //Check children and data align
     bool flag_leaf = true;
     size_t child_count = 0;
-    if(nt != root && __d_s == 0){
+    if(nt != node_type::root && __d_s == 0){
         if(DEBUG)
             cout << "Verify: empty node\n";
         return false;
@@ -328,7 +328,7 @@ bool btree_node<T>::verify(node_type nt) const{
             }
         }
         try{
-            if(!__c[i]->verify(child)) //if there is a nullptr in __c, then it will crash
+            if(!__c[i]->verify(node_type::child)) //if there is a nullptr in __c, then it will crash
                 return false;
         }catch(...){
             cout << "Nullptr child\n";
