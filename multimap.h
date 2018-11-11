@@ -2,13 +2,85 @@
 #define MULTIMAP_H
 
 #include "map.h"
+#include "mpair.h"
 
 template<typename K=string, typename V=int>
-class multimap : simple_map<K,vector<V>{
+class multimap : private simple_map<K,vector<V> >{
 public:
-    multimap();
+    //CTOR
+    multimap(); //Calls ctor of base class
+    
+    vector<V>& operator [](const K& k); //Accesses the vec at key; creates vec if no key exists yet
+    bool insert(const K& k);
+    bool insert(const K& k, const V& v); //inserts a key: vec
+    bool insert(const MPair<K,V>& pair);
+    bool erase(const K &k);
+
+    void clear() {__map.cleartree();this->__keys=0;}
+    bool is_valid() const{return __map.verify();}
+
+    size_t size() const{return this->__keys;}
+    void print() const{__map.print();}
+
+    friend ostream& operator <<(ostream& outs, const multimap<K,V>& m){
+        outs << "------------ MAP -------------" << endl;
+        outs << m.__map << endl;
+        return outs;
+    }
 private:
     BTree<MPair<K, V> > __map;
 };
 
+template<typename K, typename V>
+multimap<K,V>::multimap()
+    : simple_map<K,vector<V> >(){
+
+}
+
+template<typename K, typename V>
+vector<V>& multimap<K,V>::operator [](const K& k){
+    MPair<K,V>* ptr = __map.find(k);
+    if(!ptr){
+        this->__keys++;
+        __map.insert(MPair<K,V>(k));
+        ptr = __map.find(k);
+    }
+    return ptr->vec;
+}
+template<typename K, typename V>
+bool multimap<K,V>::insert(const K& k, const V& v){
+    //Inserts a key + value
+    bool check = __map.insert(MPair<K,V>(k, v));
+    if(check)
+        this->__keys++;
+    MPair<K,V>* ptr = __map.find(MPair<K,V>(k));
+    ptr->vec += v;
+
+    return check;
+}
+template<typename K, typename V>
+bool multimap<K,V>::insert(const K& k){
+    //Inserts a key + value
+    bool check = __map.insert(MPair<K,V>(k));
+    if(check)
+        this->__keys++;
+    return check;
+}
+template<typename K, typename V>
+bool multimap<K,V>::insert(const MPair<K,V>& pair){
+    //Inserts a key + value
+    bool check = __map.insert(pair);
+    if(check)
+        this->__keys++;
+    return check;
+}
+template<typename K, typename V>
+bool multimap<K,V>::erase(const K &k){
+    MPair<K,V>* ptr = __map.find(MPair<K,V>(k));
+    if(!ptr)
+        return false;
+    __map.remove((*ptr));
+    this->__keys--;
+    return true;
+}
 #endif // MULTIMAP_H

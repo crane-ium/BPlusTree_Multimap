@@ -1,5 +1,7 @@
 Issues:
--
+-Clean up efficiency?
+-Speed up any redundancies, perhaps in the case of moving data
+ -Also suggestion for btree about merging before rotation
 
 Missing:
 -Copy CTORs

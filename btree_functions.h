@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -82,10 +83,20 @@ ostream& operator <<(ostream& outs, const vector<T>& data){
     return outs;
 }
 template<typename T>
-vector<T>& operator +=(vector<T>& left, vector<T>& right){
+vector<T>& operator +=(vector<T>& left, const vector<T>& right){
     for(size_t i = 0; i < right.size(); i++){
         left.push_back(right[i]);
     }
+    return left;
+}
+template<typename T>
+vector<T>& operator +=(vector<T>& left, const T& right){
+    left.push_back(right);
+    return left;
+}
+template<typename T>
+vector<T>& operator -=(vector<T>& left, const T& right){
+    left.erase(std::remove(left.begin(), left.end(), right), left.end());
     return left;
 }
 #endif // BTREE_FUNCTIONS_H

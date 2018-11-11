@@ -2,8 +2,12 @@
 #include "btree"
 #include "pair.h"
 #include "map.h"
+#include "dictmap.h"
+#include "mpair.h"
 #include <random>
 #include <ctime>
+#include "multimap.h"
+
 void test_BTree_auto(int tree_size=5000, int how_many=500, bool report=false);
 bool test_BTree_auto(int how_many, bool report=true);
 int Random(int lo, int hi)
@@ -18,26 +22,69 @@ struct tester{
 };
 void old_tests();
 void test_pair_v1();
+void test_pair_v2();
 using namespace std;
-
+template<class T>
+struct A{
+    T item;
+    A(const T& i=T()):item(i){}
+    void assign(const T& i){item = i;}
+    virtual void display() const{
+        cout << item << endl;
+    }
+};
+//template<class T>
+struct B : public A<int>, public A<string>{
+    B():A<int>(), A<string>(){}
+    void display() const{
+        cout << A<int>::item << " : " << A<string>::item << endl;
+    }
+};
 int main()
 {
-    using pair = Pair<string, long long>;
-    simple_map<string, long long> map;
-    map.insert("foo", 111);
-    map.insert("bar",222);
-    map.insert("test",333);
-    cout << map << endl;
-    map.erase("bar");
-    map.erase("bar");
-    map.print();
-    cout << map.size() << endl;
-    map["bar"] = 1;
-    map.at("foo") = -111;
-    map["googly"] = 1235;
-    map.at("new") = 321;
-    map.insert(pair("pairinsert",99));
-    map.print();
+    multimap<string, int> mm;
+
+    vector<int> vv;
+    cout << vv << endl;
+    mm.insert("key", 1);
+    mm.insert("bar", 22);
+    mm["key"] += 10;
+    mm["foo"] += -5;
+    cout << mm << endl;
+    cout << mm.size() << endl;
+    mm["foo"] -= -5;
+    mm[""] -= 100;
+    mm[""] += 100;
+    cout << mm.size() << endl << "Valid: " << mm.is_valid() << endl;
+    mm["bar"] += 33;
+    mm["bar"] -= 99;
+    mm["foo"] -= 66;
+    mm.erase("");
+    mm.erase("foo");
+    cout << mm.size() << endl << "Valid: " << mm.is_valid() << endl;
+    mm.clear();
+    cout << mm.size() << endl << "Valid: " << mm.is_valid() << endl;
+    mm.print();
+
+    
+//    MPair<string, int> mp1("key");
+//    vector<int> v;
+//    v.push_back(22);
+//    v.push_back(55);
+//    v.push_back(88);
+//    mp1.vec += 25;
+//    mp1.vec += v;
+//    cout << mp1 << endl;
+
+//    B b;
+//    b.display();
+//    b.assign("foo");
+//    b.assign(123);
+//    b.display();
+
+//    Dict<int, int, string> dictionary;
+//    dictionary.insert("Test", 123);
+//    dictionary.insert(987, 555);
     return 0;
 }
 
@@ -185,4 +232,24 @@ void test_pair_v1(){
     int ii = siPair("123", 666);
     cout << ii << endl;
     cout << btpair << endl;
+}
+
+void test_pair_v2(){
+    using pair = Pair<string, long long>;
+    simple_map<string, long long> map;
+    map.insert("foo", 111);
+    map.insert("bar",222);
+    map.insert("test",333);
+    cout << map << endl;
+    map.erase("bar");
+    map.erase("bar");
+    map.print();
+    cout << map.size() << endl;
+    map["bar"] = 1;
+    map.at("foo") = -111;
+    map["googly"] = 1235;
+    map.at("new") = 321;
+    map.insert(pair("pairinsert",99));
+    map.clear();
+    map.print();
 }
