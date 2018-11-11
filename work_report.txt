@@ -4,4 +4,3 @@ Issues:
  -Also suggestion for btree about merging before rotation
 
 Missing:
--Copy CTORs

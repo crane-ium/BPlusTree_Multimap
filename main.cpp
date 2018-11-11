@@ -23,6 +23,8 @@ struct tester{
 void old_tests();
 void test_pair_v1();
 void test_pair_v2();
+template<typename maptype=simple_map<int, string> >
+void multimap_test1(); //tests map/multimap
 using namespace std;
 template<class T>
 struct A{
@@ -42,29 +44,34 @@ struct B : public A<int>, public A<string>{
 };
 int main()
 {
-    multimap<string, int> mm;
 
-    vector<int> vv;
-    cout << vv << endl;
-    mm.insert("key", 1);
-    mm.insert("bar", 22);
-    mm["key"] += 10;
-    mm["foo"] += -5;
-    cout << mm << endl;
-    cout << mm.size() << endl;
-    mm["foo"] -= -5;
-    mm[""] -= 100;
-    mm[""] += 100;
-    cout << mm.size() << endl << "Valid: " << mm.is_valid() << endl;
-    mm["bar"] += 33;
-    mm["bar"] -= 99;
-    mm["foo"] -= 66;
-    mm.erase("");
-    mm.erase("foo");
-    cout << mm.size() << endl << "Valid: " << mm.is_valid() << endl;
-    mm.clear();
-    cout << mm.size() << endl << "Valid: " << mm.is_valid() << endl;
-    mm.print();
+    cout << "-------- SIMPLEMAP ---------" << endl;
+    multimap_test1<>();
+    cout << "-------- MULTIMAP ---------" << endl;
+    multimap_test1<multimap<int, string> >();
+//    multimap<string, int> mm;
+
+//    vector<int> vv;
+//    cout << vv << endl;
+//    mm.insert("key", 1);
+//    mm.insert("bar", 22);
+//    mm["key"] += 10;
+//    mm["foo"] += -5;
+//    cout << mm << endl;
+//    cout << mm.size() << endl;
+//    mm["foo"] -= -5;
+//    mm[""] -= 100;
+//    mm[""] += 100;
+//    cout << mm.size() << endl << "Valid: " << mm.is_valid() << endl;
+//    mm["bar"] += 33;
+//    mm["bar"] -= 99;
+//    mm["foo"] -= 66;
+//    mm.erase("");
+//    mm.erase("foo");
+//    cout << mm.size() << endl << "Valid: " << mm.is_valid() << endl;
+//    mm.clear();
+//    cout << mm.size() << endl << "Valid: " << mm.is_valid() << endl;
+//    mm.print();
 
     
 //    MPair<string, int> mp1("key");
@@ -86,6 +93,79 @@ int main()
 //    dictionary.insert("Test", 123);
 //    dictionary.insert(987, 555);
     return 0;
+}
+
+template<typename maptype>
+void multimap_test1(){
+    //Run a comprehensive test on simple_map and multimap
+    //First let's test map
+    maptype m;
+    static const size_t KEYS = 100;
+    static const int RMIN=-100, RMAX=100;
+    size_t unique_keys = 0;
+    int* map_keys = new int[KEYS]; //keep track of what we want to add
+    size_t unq_keys[RMAX-RMIN] = {0};
+    for(size_t i = 0; i < KEYS; i++){
+        map_keys[i] = rand() % (RMAX - RMIN) + RMIN;
+    }
+    //count unique keys
+    for(size_t i = 0; i < KEYS; i++){
+        if(!unq_keys[map_keys[i]-RMIN]){
+            unique_keys++;
+        }
+        unq_keys[map_keys[i]-RMIN]++;
+    }
+    //INSERT INTO MAP!
+    for(size_t i = 0; i < KEYS; i++){
+        m[map_keys[i]] += (string)("0");
+    }
+    cout << "~Inserted into map~" << endl;
+    m.print();
+    cout << "-- AFTER insert data --\n";
+    cout << "Unique keys: " << unique_keys
+         << (unique_keys==m.size()?" Valid size":" Invalid size") << endl;
+    m.print_data();
+    //NOW DELETE FROM THE MAP!
+    //let's delete the first half of keys, regardless of uniqueness
+    for(size_t i = 0; i < KEYS/2; i++){
+        m.erase(map_keys[i]);
+        if(unq_keys[map_keys[i]-RMIN]){
+            unq_keys[map_keys[i]-RMIN] = 0;
+            unique_keys--;
+        }
+    }
+    cout << "~Deleted from map~" << endl;
+    m.print();
+    cout << "-- AFTER delete data --\n";
+    cout << "Unique keys AFTER DELETE: " << unique_keys
+         << (unique_keys==m.size()?" Valid size":" Invalid size") << endl;
+    m.print_data();
+    //Test other various things
+    m.clear();
+    cout << ">Cleared the tree\n";
+    m.print();
+    m.print_data();
+    cout << ">Insert 5/5 (unique/duplicates) test\n";
+    for(size_t i = 0; i < 10; i++){
+        m.insert(i/2, to_string(i)); //insert half the keys
+//        m.print();
+    }
+    m.print();
+    m.print_data();
+    cout << ">Copy ctor test: copy first map + insert\n";
+    maptype m2(m);
+    for(size_t i = 0; i < 10; i++)
+        m2.insert(i, to_string(i+100));
+    m2.print();
+    m2.print_data();
+    cout << ">Copy operator test: copy second map + insert\n";
+    maptype m3;
+    m3 = m2;
+    for(size_t i = 5; i < 15; i++)
+        m3[i] += to_string(i);
+    m3.print();
+    m3.print_data();
+    cout << "--Complete Tests--\n\n";
 }
 
 void test_BTree_auto(int tree_size, int how_many, bool report){
