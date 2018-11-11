@@ -13,6 +13,7 @@ using namespace std;
 
 template<typename T>
 struct btree_node{
+    enum node_type { root, parent, child};
     template<typename U> friend class BTree; //give BTree access
     //base ctor
     btree_node(size_t min=1, bool dupes=false);
@@ -29,7 +30,7 @@ struct btree_node{
 
     size_t size() const;
     void print(size_t level=0) const; //prints the whole tree from the node
-    bool verify() const;
+    bool verify(node_type nt=root) const;
     template<typename U>
     friend ostream& operator <<(ostream& outs, const btree_node<U>& node);
     template<typename U>
@@ -120,6 +121,9 @@ bool btree_node<T>::insert(const T &input, bool force){
     }else{
         //get the child the input will be inserted into
         size_t child = first_ge(__d, __d_s, input);
+        //Check the data at child if dupes aren't allowed
+        if(child < __d_s && !__dupes && __d[child] == input)
+            return false;
         bool check = __c[child]->insert(input);
         if(__c[child]->excess()){
             //The child is overburdened. Take action
@@ -280,11 +284,11 @@ void btree_node<T>::insert_child(btree_node<T>* node){
     }
 }
 template<typename T>
-bool btree_node<T>::verify() const{
+bool btree_node<T>::verify(node_type nt) const{
     //Check children and data align
     bool flag_leaf = true;
     size_t child_count = 0;
-    if(__d_s == 0){
+    if(nt != root && __d_s == 0){
         if(DEBUG)
             cout << "Verify: empty node\n";
         return false;
@@ -324,7 +328,7 @@ bool btree_node<T>::verify() const{
             }
         }
         try{
-            if(!__c[i]->verify()) //if there is a nullptr in __c, then it will crash
+            if(!__c[i]->verify(child)) //if there is a nullptr in __c, then it will crash
                 return false;
         }catch(...){
             cout << "Nullptr child\n";
