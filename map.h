@@ -12,6 +12,8 @@ class simple_map{
 public:
     //CTORS
     simple_map();
+    simple_map(const simple_map<K,V>& copy);
+    simple_map<K,V>& operator =(const simple_map<K,V>& copy);
 
     //Element access controls
     V& operator [](const K& k);
@@ -25,6 +27,7 @@ public:
 
     size_t size() const;
     virtual bool is_valid() const {return (__map.verify());}
+    virtual void print_data(ostream& outs=cout) const; //prints some stats about current map
 
     virtual void print() const{ __map.print();}
     friend ostream& operator<<(ostream& outs, const simple_map<K,V>& m){
@@ -42,6 +45,21 @@ template<typename K, typename V>
 simple_map<K,V>::simple_map(){
 //    map(2, false);
     __keys = 0;
+}
+template<typename K, typename V>
+simple_map<K,V>::simple_map(const simple_map<K,V>& copy){
+    __map = copy.__map;
+    __keys = copy.__keys;
+}
+template<typename K, typename V>
+simple_map<K,V>& simple_map<K,V>::operator =(const simple_map<K,V>& copy){
+    if(this == &copy)
+        return (*this);
+    simple_map<K,V> temp(copy);
+    swap(temp.__keys, __keys);
+    swap(temp.__map, __map);
+    //temp becomes out of scope and is deleted
+    return (*this);
 }
 
 template<typename K, typename V>
@@ -82,12 +100,18 @@ void simple_map<K,V>::clear(){
     __keys = 0;
 }
 template<typename K, typename V>
+void simple_map<K,V>::print_data(ostream& outs) const{
+    outs << "Size: " << size() << " | Valid Tree: "
+         << (is_valid()?"True":"False") << endl;
+}
+template<typename K, typename V>
 V& simple_map<K,V>::at(const K &k){
     Pair<K,V>* ptr = __map.find(k);
     if(ptr == nullptr){
         __map.insert(Pair<K,V>(k, V()));
         //ptr = new Pair<K,V>(k,V()) then insert?
         ptr = __map.find(k);
+        __keys++;
     }
     return (*ptr).val;
 }
