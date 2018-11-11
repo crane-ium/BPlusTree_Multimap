@@ -18,71 +18,76 @@ public:
     V& at(const K& k);
     const V& at(const K& k) const;
     //MEMBER MODIFIERS
-    bool insert(const K& k, const V& v);
-    bool insert(const Pair<K,V>& pair);
-    bool erase(const K& k);
-    void clear();
+    virtual bool insert(const K& k, const V& v);
+    virtual bool insert(const Pair<K,V>& pair);
+    virtual bool erase(const K& k);
+    virtual void clear();
 
     size_t size() const;
-    bool is_valid() const {return (map.verify());}
+    virtual bool is_valid() const {return (__map.verify());}
 
-    void print() const{ map.print();}
+    virtual void print() const{ __map.print();}
     friend ostream& operator<<(ostream& outs, const simple_map<K,V>& m){
         outs << "------------ MAP -------------" << endl;
-        outs << m.map << endl;
+        outs << m.__map << endl;
         return outs;
     }
 
-private:
-    BTree<Pair<K,V> > map; //By default stores integers as keys
-    size_t keycount; //I have size functions, this reduces workload though
+protected:
+    BTree<Pair<K,V> > __map; //By default stores integers as keys
+    size_t __keys; //I have size functions, this reduces workload though
 };
 
 template<typename K, typename V>
 simple_map<K,V>::simple_map(){
 //    map(2, false);
-    keycount = 0;
+    __keys = 0;
 }
 
 template<typename K, typename V>
 bool simple_map<K,V>::insert(const K &k, const V &v){
-    bool check = map.insert(Pair<K,V>(k, v));
+    bool check = __map.insert(Pair<K,V>(k, v));
     if(check)
-        keycount++;
+        __keys++;
     return check;
 }
 template<typename K, typename V>
 bool simple_map<K,V>::insert(const Pair<K,V>& pair){
-    bool check = map.insert(pair);
+    bool check = __map.insert(pair);
     if(check)
-        keycount++;
+        __keys++;
     return check;
 }
 template<typename K, typename V>
 bool simple_map<K,V>::erase(const K &k){
     //Search for Pair<K,V>(K,V())
-    Pair<K,V>* ptr = map.find(Pair<K,V>(k, V()));
+    Pair<K,V>* ptr = __map.find(Pair<K,V>(k, V()));
     if(ptr == nullptr)
         return false;
-    map.remove((*ptr));
-    keycount--;
+    __map.remove((*ptr));
+    __keys--;
     return true;
 }
 template<typename K, typename V>
 size_t simple_map<K,V>::size() const{
-    return keycount;
+    return __keys;
 }
 template<typename K, typename V>
 V& simple_map<K,V>::operator [](const K& k){
     return at(k);
 }
 template<typename K, typename V>
+void simple_map<K,V>::clear(){
+    __map.cleartree();
+    __keys = 0;
+}
+template<typename K, typename V>
 V& simple_map<K,V>::at(const K &k){
-    Pair<K,V>* ptr = map.find(k);
+    Pair<K,V>* ptr = __map.find(k);
     if(ptr == nullptr){
-        map.insert(Pair<K,V>(k, V()));
+        __map.insert(Pair<K,V>(k, V()));
         //ptr = new Pair<K,V>(k,V()) then insert?
-        ptr = map.find(k);
+        ptr = __map.find(k);
     }
     return (*ptr).val;
 }
