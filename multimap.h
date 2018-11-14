@@ -32,7 +32,7 @@ public:
         return outs;
     }
 private:
-    BTree<MPair<K, V> > __map;
+    BPlusTree<MPair<K, V> > __map;
 };
 
 template<typename K, typename V>

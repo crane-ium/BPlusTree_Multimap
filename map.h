@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <typeinfo>
-#include "btree"
+#include "bplustree.h"
 #include "pair.h"
 
 //The map can hold keys of string or int
@@ -37,7 +37,7 @@ public:
     }
 
 protected:
-    BTree<Pair<K,V> > __map; //By default stores integers as keys
+    BPlusTree<Pair<K,V> > __map; //By default stores integers as keys
     size_t __keys; //I have size functions, this reduces workload though
 };
 

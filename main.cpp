@@ -1,5 +1,5 @@
 #include <iostream>
-#include "btree"
+#include "bplustree.h"
 #include "pair.h"
 #include "map.h"
 #include "dictmap.h"
@@ -8,8 +8,8 @@
 #include <ctime>
 #include "multimap.h"
 
-void test_BTree_auto(int tree_size=5000, int how_many=500, bool report=false);
-bool test_BTree_auto(int how_many, bool report=true);
+void test_BPlusTree_auto(int tree_size=5000, int how_many=500, bool report=false);
+bool test_BPlusTree_auto(int how_many, bool report=true);
 int Random(int lo, int hi)
 {
     int r = rand()%(hi-lo+1)+lo;
@@ -44,11 +44,25 @@ struct B : public A<int>, public A<string>{
 };
 int main()
 {
+    //bpt<mpair<string, int> > tree;
+    //the T is mpair<string, int>
+    //if we want to copy an mpair with only the key
+    //we need be able to construct a new one
+    //without taking the values (ints)
+    //so then we should take
+    BPlusTree<int> bpt;
+    for(size_t i = 0; i < 100; i++){
+        bpt.insert(rand() % 100);
+    }
+    bpt.print();
+    bpt.print_tree();
+//    bpt.print();
+//    bpt.print_tree();
 
-    cout << "-------- SIMPLEMAP ---------" << endl;
-    multimap_test1<>();
-    cout << "-------- MULTIMAP ---------" << endl;
-    multimap_test1<multimap<int, string> >();
+//    cout << "-------- SIMPLEMAP ---------" << endl;
+//    multimap_test1<>();
+//    cout << "-------- MULTIMAP ---------" << endl;
+//    multimap_test1<multimap<int, string> >();
 //    multimap<string, int> mm;
 
 //    vector<int> vv;
@@ -170,7 +184,7 @@ void multimap_test1(){
     cout << "--Complete Tests--\n\n";
 }
 
-void test_BTree_auto(int tree_size, int how_many, bool report){
+void test_BPlusTree_auto(int tree_size, int how_many, bool report){
     bool verified = true;
     for (int i = 0; i< how_many; i++){
         if (report){
@@ -178,7 +192,7 @@ void test_BTree_auto(int tree_size, int how_many, bool report){
             cout<<" T E S T:    "<<i<<endl;
             cout<<"*********************************************************"<<endl;
         }
-        if (!test_BTree_auto(tree_size, report)){
+        if (!test_BPlusTree_auto(tree_size, report)){
             cout<<"T E S T :   ["<<i<<"]    F A I L E D ! ! !"<<endl;
             verified = false;
             return;
@@ -193,10 +207,10 @@ void test_BTree_auto(int tree_size, int how_many, bool report){
 
 }
 
-bool test_BTree_auto(int how_many, bool report){
+bool test_BPlusTree_auto(int how_many, bool report){
     const int MAX = 10000;
     assert(how_many < MAX);
-    BTree<int> bpt;
+    BPlusTree<int> bpt;
     int a[MAX];
     int original[MAX];
     int deleted_list[MAX];
@@ -265,8 +279,8 @@ bool test_BTree_auto(int how_many, bool report){
 void old_tests(){
 
     srand(time(NULL));
-//    test_BTree_auto(1000, 10, false);
-    BTree<int> bt;
+//    test_BPlusTree_auto(1000, 10, false);
+    BPlusTree<int> bt;
     for(size_t i = 0; i < 10; i++)
         bt.insert(i);
     bt.get(5) = 10;
@@ -290,10 +304,10 @@ void old_tests(){
     size_t st = 5;
     int in = -5;
     cout << (int(st) > in) << endl;
-    BTree<int> bt2(bt);
+    BPlusTree<int> bt2(bt);
     bt2.insert(33);
     bt2.print();
-    BTree<int> bt3;
+    BPlusTree<int> bt3;
     bt3 = bt2;
     bt3.insert(111);
     bt3.print();
@@ -304,7 +318,7 @@ void test_pair_v1(){
     typedef Pair<string, int> siPair;
     Pair<string, int> pair("str",123);
     Pair<string, int> pair2("str",321);
-    BTree<Pair<string, int> > btpair;
+    BPlusTree<Pair<string, int> > btpair;
     btpair.insert(siPair("new1", 111));
     btpair.insert(siPair("random", 222));
     btpair.insert(siPair("extra", 333));
