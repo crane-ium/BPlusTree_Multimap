@@ -35,7 +35,7 @@ template<typename T>
 bool insert_sorted(T* data, size_t& s, const T& target, bool dupes=false){
     if(!dupes && is_there(data, s, target))
         return false;
-    data[s] = target;
+    data[s] = target; //Calls copy ctor here onto target T()
     for(size_t i = 0; s - i > 0; i++){ //insertion sort it
         if(data[s-i] < data[s-i-1])
             swap(data[s-i], data[s-i-1]);

@@ -1,17 +1,22 @@
-#ifndef BTREE_H
-#define BTREE_H
+#ifndef BPLUSTREE_H
+#define BPLUSTREE_H
 
 #include <iostream>
 #include "btree_node.h"
 
 template<typename T>
-class BTree{
+/**
+ * @brief The BPlusTree class
+ * Create a tree data structure that can handle an
+ * iterator while maintaining a complete tree
+ */
+class BPlusTree{
 public:
-    BTree(size_t min=1, bool dupes=false);
+    BPlusTree(size_t min=1, bool dupes=false);
     //BIG3
-    ~BTree();
-    BTree(const BTree<T>& copy);
-    BTree<T>& operator =(const BTree<T>& copy);
+    ~BPlusTree();
+    BPlusTree(const BPlusTree<T>& copy);
+    BPlusTree<T>& operator =(const BPlusTree<T>& copy);
     //MEMBER FUNCTIONS
     bool insert(const T& input);
     bool remove(const T& input);
@@ -21,7 +26,8 @@ public:
     T& get(const T& input);
 
     void cleartree(); //Clears all but the root
-    void print() const;
+    void print() const; //Prints the linked-list of bplustree
+    void print_tree() const; //Prints the btree in tree format
     bool verify() const;
     bool empty() const;
     size_t size() const;
@@ -39,7 +45,7 @@ public:
         }
     }
     template<typename U>
-    friend std::ostream& operator <<(std::ostream& outs, const BTree<U>& bt);
+    friend std::ostream& operator <<(std::ostream& outs, const BPlusTree<U>& bt);
 private:
     size_t _min;
     bool __dupes;
@@ -47,39 +53,39 @@ private:
 };
 
 template<typename T>
-BTree<T>::BTree(size_t min, bool dupes): _min(min), __dupes(dupes){
+BPlusTree<T>::BPlusTree(size_t min, bool dupes): _min(min), __dupes(dupes){
     __head = new btree_node<T>(min, dupes);
 }
 template<typename T>
-BTree<T>::~BTree(){
+BPlusTree<T>::~BPlusTree(){
     delete __head;
 }
 template<typename T>
-BTree<T>::BTree(const BTree<T>& copy){
+BPlusTree<T>::BPlusTree(const BPlusTree<T>& copy){
     /*this->*/
     _min = copy._min;
     __dupes = copy.__dupes;
     __head = new btree_node<T>((*copy.__head));
 }
 template<typename T>
-BTree<T>& BTree<T>::operator =(const BTree<T>& copy){
+BPlusTree<T>& BPlusTree<T>::operator =(const BPlusTree<T>& copy){
     if(this == (&copy))
         return (*this);
-    BTree temp(copy);
+    BPlusTree temp(copy);
     swap(_min, temp._min);
     swap(__dupes, temp.__dupes);
     swap(__head, temp.__head);
     return (*this);
 }
 template<typename T>
-bool BTree<T>::insert(const T &input){
+bool BPlusTree<T>::insert(const T &input){
     bool check = __head->insert(input);
     fix_excess(__head);
 //    assert(__head->verify());
     return check;
 }
 template<typename T>
-bool BTree<T>::remove(const T &input){
+bool BPlusTree<T>::remove(const T &input){
     //Tries to remove a desired input;
     //Returns false if no found input;
     bool check = __head->remove(input);
@@ -88,11 +94,15 @@ bool BTree<T>::remove(const T &input){
     return check;
 }
 template<typename T>
-void BTree<T>::print() const{
+void BPlusTree<T>::print() const{
     __head->print();
 }
 template<typename T>
-bool BTree<T>::verify() const{
+void BPlusTree<T>::print_tree() const{
+    __head->print_tree();
+}
+template<typename T>
+bool BPlusTree<T>::verify() const{
     bool check = __head->verify();
 //    if(check)
 //        cout << "----VERIFIED----\n";
@@ -101,35 +111,35 @@ bool BTree<T>::verify() const{
     return check;
 }
 template<typename T>
-std::ostream& operator <<(std::ostream& outs, const BTree<T>& bt){
+std::ostream& operator <<(std::ostream& outs, const BPlusTree<T>& bt){
     bt.print();
     return outs;
 }
 template<typename T>
-bool BTree<T>::exists(const T &input){
+bool BPlusTree<T>::exists(const T &input){
     return (__head->exists(input) != nullptr);
 }
 template<typename T>
-T* BTree<T>::find(const T &input){
+T* BPlusTree<T>::find(const T &input){
     return __head->exists(input);
 }
 template<typename T>
-T& BTree<T>::get(const T &input){
+T& BPlusTree<T>::get(const T &input){
     T* val = __head->exists(input);
     assert(val!=nullptr);
     return (*val);
 }
 template<typename T>
-size_t BTree<T>::size() const{
+size_t BPlusTree<T>::size() const{
     return __head->size();
 }
 template<typename T>
-bool BTree<T>::empty() const{
+bool BPlusTree<T>::empty() const{
     return !(bool)__head->__d_s;
 }
 
 template<typename T>
-void BTree<T>::cleartree(){
+void BPlusTree<T>::cleartree(){
     __head->__d_s = 0; //delete all children
     for(size_t i = 0; i < __head->_min*2+2; i++){
         delete __head->__c[i];
@@ -137,4 +147,4 @@ void BTree<T>::cleartree(){
     }
 }
 
-#endif // BTREE_H
+#endif // BPLUSTREE_H
