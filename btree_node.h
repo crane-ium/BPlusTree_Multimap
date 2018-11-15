@@ -640,14 +640,7 @@ T* btree_node<T>::exists(const T& input){
 }
 template<typename T>
 size_t btree_node<T>::size() const{
-    size_t count = 0;
-    if(!is_leaf()){
-        for(size_t i = 0; i < __d_s+1; i++){
-            count += __c[i]->size();
-        }
-    }
-    count += __d_s;
-    return count;
+    return this->__d_s;
 }
 template<typename T>
 T& btree_node<T>::get_smallest(){

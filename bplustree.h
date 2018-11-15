@@ -78,26 +78,27 @@ public:
     void print_tree() const; //Prints the btree in tree format
     bool verify(bool output=false) const;
     bool empty() const;
-    size_t size() const;
-    void operator ()(const size_t& min, const bool& dupes){
-        if(__head->is_leaf()){
-            if(min > _min){
-                //simple allowing of resizing
-                _min = min;
-                __head->_min = min;
-            }
-            if(__dupes == false){ //Allow from false->true only (for simple feature)
-                __dupes = dupes;
-                __head->__dupes = dupes;
-            }
-        }
-    }
+    size_t size();
+//    void operator ()(const size_t& min, const bool& dupes){
+//        if(__head->is_leaf()){
+//            if(min > _min){
+//                //simple allowing of resizing
+//                _min = min;
+//                __head->_min = min;
+//            }
+//            if(__dupes == false){ //Allow from false->true only (for simple feature)
+//                __dupes = dupes;
+//                __head->__dupes = dupes;
+//            }
+//        }
+//    }
     template<typename U>
     friend std::ostream& operator <<(std::ostream& outs, const BPlusTree<U>& bt);
 private:
     size_t _min;
     bool __dupes;
     btree_node<T>* __head;
+    size_t __size; //Track the size;
 };
 
 template<typename T>
@@ -197,8 +198,14 @@ T& BPlusTree<T>::get(const T &input){
     return (*val);
 }
 template<typename T>
-size_t BPlusTree<T>::size() const{
-    return __head->size();
+size_t BPlusTree<T>::size(){
+    typename BPlusTree<T>::Iterator it;
+    size_t count = 0;
+    for(it=begin(); it != end(); it++){
+        count++;
+    }
+    __size = count; //update size. Just in case we want to utilize this
+    return __size;
 }
 template<typename T>
 bool BPlusTree<T>::empty() const{

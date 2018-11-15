@@ -52,8 +52,12 @@ int main()
     //so then we should take
     using BPT = BPlusTree<int>;
     BPT bpt;
+    bool check;
+    size_t count;
     for(size_t i = 0; i < 100; i++){
-        bpt.insert(rand() % 100);
+        check = bpt.insert(rand() % 100);
+        if(check)
+            count++;
     }
     bpt.print();
     bpt.print_tree();
@@ -71,6 +75,18 @@ int main()
         cout << (*iter) << " : ";
         iter.print();
     }
+    cout << "Size: " << bpt.size() << " vs Size count: " << count << endl;
+    bpt.cleartree();
+    assert(bpt.empty());
+    bpt.insert(50);
+    bpt.print();
+    for(iter = bpt.begin(); iter != bpt.end(); iter++)
+        iter.print();
+    cout << "Size: " << bpt.size() << endl;
+    bpt.get(50) = 25;
+    assert(bpt.verify());
+    cout << bpt << endl;
+
 //    bpt.print();
 //    bpt.print_tree();
 

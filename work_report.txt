@@ -1,3 +1,8 @@
+Working on:
+-Complete protection/encapsulation
+-Fixing outdated functions for bplustree
+-Adding remove
+
 Issues:
 -Clean up efficiency?
 -Speed up any redundancies, perhaps in the case of moving data
