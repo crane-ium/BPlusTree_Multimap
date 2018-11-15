@@ -19,6 +19,7 @@ struct btree_node{
     enum class node_type { root, parent, child};
     enum Leaf {notleaf=1, isleaf=0}; //for certain flags
     template<typename U> friend class BPlusTree; //give BTree access
+
     //base ctor
     btree_node(size_t min=1, bool dupes=false);
     //BIG3
@@ -29,8 +30,9 @@ struct btree_node{
     bool insert(const T& input, bool force=false);
     bool remove(const T& input); //Removes a found input
 
-    T *exists(const T& input); //Returns t/f if exists
-    T& get_var(const T& input); //Returns address of data; Assumes exists
+    T *exists(const T& input); //Returns ptr/nullptr of found/notfound data
+    btree_node<T>* find(const T& input); //Returns node containing the input, or nullptr if dne
+//    T& get_var(const T& input); //Returns reference of data; Assumes exists
 
     size_t size() const;
     void print() const; //prints a tree
@@ -49,16 +51,17 @@ private:
     bool excess() const; //Returns t/f if _data length > 2*_min
     bool is_leaf() const; //Checks if it is a leaf
     void insert_child(btree_node<T> *node); //Inserts a node
-    bool rotate_left(size_t i); //rotates from a leaf sibling with spare data
-    bool rotate_right(size_t i); //rotates a data, and a child if not leaf
+    /**/bool rotate_left(size_t i); //rotates from a leaf sibling with spare data
+    /**/bool rotate_right(size_t i); //rotates a data, and a child if not leaf
     //Checks all children to see if anyone can lend the empty sibling data
-    bool rotate_check(size_t i);
-    void merge(btree_node<T>* left, btree_node<T>* &right); //merges two nodes
-    bool take_greatest(T& input); //Takes largest data from leaf in subtree
-    bool take_smallest(T& input); //Takes smallest data from leaf in subtree
-    bool fix_empty_child(size_t i); //Checks child for emptiness and fixes
+    /**/bool rotate_check(size_t i);
+    /**/void merge(btree_node<T>* left, btree_node<T>* &right); //merges two nodes
+    /**/bool take_greatest(T& input); //Takes largest data from leaf in subtree
+    /**/bool take_smallest(T& input); //Takes smallest data from leaf in subtree
+    T& get_smallest();
+    /**/bool fix_empty_child(size_t i); //Checks child for emptiness and fixes
     //At __c[c_i], check whether to merge left or right
-    bool merge_data_child(size_t c_i);
+    /**/bool merge_data_child(size_t c_i);
 };
 
 template<typename T>
@@ -352,13 +355,16 @@ bool btree_node<T>::verify(node_type nt) const{
             cout << "Verify: empty node\n";
         return false;
     }
+    if(DEBUG) cout << (*this) << endl;
+    //Scout for extra non-nullptrs where they shouldn't be
+    // and check that children count = data_size + 1
     for(size_t i = 0; i < 2*_min+2; i++){
         if(i < __d_s+1){ //only count if it's within the range
             if(__c[i]==nullptr && flag_leaf)
                 flag_leaf = false;
             else if(__c[i] != nullptr && !flag_leaf){
                 if(DEBUG)
-                    cout << "not null child in leaf\n";
+                    cout << "not-null child in leaf\n";
                 return false;
             }
             if(__c[i]!=nullptr)
@@ -371,30 +377,70 @@ bool btree_node<T>::verify(node_type nt) const{
             }
         }
     }
-    if(child_count == 0 && !flag_leaf)
-        return true;
-    for(size_t i = 0; i < __d_s+1; i++){
-        //Check that the children are placed accordingly to the data
-        if(i < __d_s){
-            if(__d[i] < __c[i]->__d[0] || __d[i] > __c[i+1]->__d[0]){
-                cout << "Index's child is greater than data\n";
+    //Check if leaf
+    if(child_count == 0 && !flag_leaf){
+        //Check that data is in-order
+        for(size_t i = 0; i < __d_s-1; i++){
+            if(__d[i] > __d[i+1] || __d[i] == __d[i+1]){
+                if(DEBUG) cout << "invalid __d: " << __d[i] << ">=" << __d[i+1] << endl;
                 return false;
             }
-        }else{ //check last child
-            if(__d[i-1] > __c[i]->__d[0]){
-                cout << "Last child is smaller than data\n";
+            //Verify not greater equal to next sibling
+            if(__n && (__d[__d_s-1] > __n->__d[0] || __d[__d_s-1] == __n->__d[0])){
+                if(DEBUG) cout << "Invalid __d with __n->__d: "
+                               << __d[__d_s-1] << " >= " << __n->__d[0] << endl;
                 return false;
             }
         }
-        try{
-            if(!__c[i]->verify(node_type::child)) //if there is a nullptr in __c, then it will crash
+        return true;
+    }
+
+    //Check each data is > all data in it's child
+    for(size_t i = 0; i < __d_s; i++){
+        for(size_t ii = 0; ii < __c[i]->__d_s; ii++)
+            if(!(__d[i] > __c[i]->__d[ii])){
+                if(DEBUG) cout << "Invalid: __d <= __c.__d: "
+                               << __d[i] << "<=" << __c[i]->__d[ii] << endl;
                 return false;
-        }catch(...){
-            cout << "Nullptr child\n";
+            }
+    }
+    //BPlusTree data is equal to __c[i+1]->smallest
+    for(size_t i = 0; i < __d_s; i++){
+        if(__d[i] != __c[i+1]->get_smallest()){
+            if(DEBUG) cout << "Invalid: data not equal to smallest: "
+                           << __d[i] << "!=" << __c[i+1]->get_smallest() << endl;
             return false;
         }
-
     }
+    bool checker;
+    for(size_t i = 0; i < __d_s+1; i++){
+        checker = __c[i]->verify();
+        if(!checker)
+            return false;
+    }
+
+//    for(size_t i = 0; i < __d_s+1; i++){
+//        //Check that the children are placed accordingly to the data
+//        if(i < __d_s){
+//            if(__d[i] < __c[i]->__d[0] || __d[i] > __c[i+1]->__d[0]){
+//                cout << "Index's child is greater than data\n";
+//                return false;
+//            }
+//        }else{ //check last child
+//            if(__d[i-1] > __c[i]->__d[0]){
+//                cout << "Last child is smaller than data\n";
+//                return false;
+//            }
+//        }
+//        try{
+//            if(!__c[i]->verify(node_type::child)) //if there is a nullptr in __c, then it will crash
+//                return false;
+//        }catch(...){
+//            cout << "Nullptr child\n";
+//            return false;
+//        }
+
+//    }
     return true;
 }
 template<typename T>
@@ -580,13 +626,17 @@ void btree_node<T>::merge(btree_node<T>* left, btree_node<T>* &right){
 }
 template<typename T>
 T* btree_node<T>::exists(const T& input){
-    size_t i = first_ge(__d, __d_s, input);
-    if(__d[i] == input && i < __d_s)
-        return &__d[i];
-    else if(!is_leaf()){
+    if(is_leaf()){ //BPTree only considers leaf data as real data
+        size_t index = index_of(__d, __d_s, input);
+        if(DEBUG) cout << (*this) << endl;
+        if(index < __d_s){
+            return &__d[index];
+        }else
+            return nullptr;
+    }else{ //not leaf, then keep diving
+        size_t i = first_greater(__d, __d_s, input);
         return __c[i]->exists(input);
-    }else
-        return nullptr;
+    }
 }
 template<typename T>
 size_t btree_node<T>::size() const{
@@ -598,6 +648,26 @@ size_t btree_node<T>::size() const{
     }
     count += __d_s;
     return count;
+}
+template<typename T>
+T& btree_node<T>::get_smallest(){
+    //Returns smallest data for this tree
+    if(!is_leaf())
+        return __c[0]->get_smallest();
+    else
+        return __d[0];
+}
+template<typename T>
+btree_node<T>* btree_node<T>::find(const T &input){
+    if(!is_leaf()){
+        size_t i = first_greater(__d, __d_s, input);
+        return __c[i]->find(input);
+    }else{
+        size_t i = index_of(__d, __d_s, input);
+        if(i == __d_s)
+            return nullptr;
+        return (this);
+    }
 }
 //template<typename T>
 //T& get_var(const T& input){

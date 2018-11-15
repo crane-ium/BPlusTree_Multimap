@@ -79,7 +79,7 @@ bool simple_map<K,V>::insert(const Pair<K,V>& pair){
 template<typename K, typename V>
 bool simple_map<K,V>::erase(const K &k){
     //Search for Pair<K,V>(K,V())
-    Pair<K,V>* ptr = __map.find(Pair<K,V>(k, V()));
+    Pair<K,V>* ptr = &__map.get(Pair<K,V>(k, V()));
     if(ptr == nullptr)
         return false;
     __map.remove((*ptr));
@@ -106,11 +106,11 @@ void simple_map<K,V>::print_data(ostream& outs) const{
 }
 template<typename K, typename V>
 V& simple_map<K,V>::at(const K &k){
-    Pair<K,V>* ptr = __map.find(k);
+    Pair<K,V>* ptr = &__map.get(k);
     if(ptr == nullptr){
         __map.insert(Pair<K,V>(k, V()));
         //ptr = new Pair<K,V>(k,V()) then insert?
-        ptr = __map.find(k);
+        ptr = &__map.get(k);
         __keys++;
     }
     return (*ptr).val;

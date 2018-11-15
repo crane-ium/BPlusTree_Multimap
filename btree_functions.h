@@ -32,6 +32,14 @@ size_t first_ge(T* data, const size_t s, const T& target){
     return s;
 }
 template<typename T>
+size_t first_greater(T* data, const size_t s, const T& target){
+    //Return first index that data[index] > target
+    for(size_t i = 0; i < s; i++)
+        if(target < data[i])
+            return i;
+    return s;
+}
+template<typename T>
 bool insert_sorted(T* data, size_t& s, const T& target, bool dupes=false){
     if(!dupes && is_there(data, s, target))
         return false;

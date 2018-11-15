@@ -13,6 +13,49 @@ template<typename T>
 class BPlusTree{
 public:
     BPlusTree(size_t min=1, bool dupes=false);
+
+    class Iterator{ //Node-Pointer encapsulating class
+    public:
+        friend class BPlusTree;
+        Iterator(btree_node<T>* _btn=nullptr, size_t _key=0)
+            : __it(_btn), __key(_key){}
+        T operator *(){ //Don't give access to change
+            return __it->__d[__key];
+        }
+        Iterator operator++(int __empty){
+            if(__key < __it->__d_s-1){
+                inc();
+            }else{
+                if(__it->__n != nullptr){
+                    __it = __it->__n;
+                    __key = 0;
+                }else{
+                    if (__key < __it->__d_s)
+                        inc(); //equivalent to Iterator end()
+                }
+            }
+            return (*this);
+        }
+        Iterator operator++(){
+            (*this)++;
+            return (*this);
+        }
+        friend operator == (const Iterator& lhs, const Iterator& rhs){
+            return (lhs.__it == rhs.__it && lhs.__key == rhs.__key);
+        }
+        friend operator != (const Iterator& lhs, const Iterator& rhs){
+            return (!(lhs==rhs));
+        }
+        void print() const{
+            cout << __it->__d[__key] << endl;
+        }
+    private:
+        btree_node<T>* __it;
+        size_t __key;
+        size_t __total_keys;
+        void inc(){__key++;__total_keys++;}
+    };
+
     //BIG3
     ~BPlusTree();
     BPlusTree(const BPlusTree<T>& copy);
@@ -22,13 +65,18 @@ public:
     bool remove(const T& input);
 
     bool exists(const T& input);
-    T* find(const T& input);
+//    T* find(const T& input);
     T& get(const T& input);
+
+    //ITERATOR FUNCTIONS
+    Iterator find(const T& input);
+    Iterator begin();
+    Iterator end();
 
     void cleartree(); //Clears all but the root
     void print() const; //Prints the linked-list of bplustree
     void print_tree() const; //Prints the btree in tree format
-    bool verify() const;
+    bool verify(bool output=false) const;
     bool empty() const;
     size_t size() const;
     void operator ()(const size_t& min, const bool& dupes){
@@ -102,12 +150,14 @@ void BPlusTree<T>::print_tree() const{
     __head->print_tree();
 }
 template<typename T>
-bool BPlusTree<T>::verify() const{
+bool BPlusTree<T>::verify(bool output) const{
     bool check = __head->verify();
-//    if(check)
-//        cout << "----VERIFIED----\n";
-//    else
-//        cout << "!!!!FAILED VERIFICATION!!!!\n";
+    if(output){
+        if(check)
+            cout << "----VERIFIED----\n";
+        else
+            cout << "!!!!FAILED VERIFICATION!!!!\n";
+    }
     return check;
 }
 template<typename T>
@@ -119,9 +169,26 @@ template<typename T>
 bool BPlusTree<T>::exists(const T &input){
     return (__head->exists(input) != nullptr);
 }
+//----------ITERATOR FUNCTIONS----------
 template<typename T>
-T* BPlusTree<T>::find(const T &input){
-    return __head->exists(input);
+typename BPlusTree<T>::Iterator BPlusTree<T>::find(const T &input){
+    btree_node<T>* found = __head->find(input);
+    size_t index = index_of(found->__d, found->__d_s, input);
+    return BPlusTree<T>::Iterator(found, index);
+}
+template<typename T>
+typename BPlusTree<T>::Iterator BPlusTree<T>::begin(){
+    btree_node<T>* walker = __head;
+    while(!walker->is_leaf()) //Travel to the first leaf
+        walker = walker->__c[0];
+    return BPlusTree<T>::Iterator(walker);
+}
+template<typename T>
+typename BPlusTree<T>::Iterator BPlusTree<T>::end(){
+    btree_node<T>* walker = __head;
+    while(!walker->is_leaf())
+        walker = walker->__c[walker->__d_s];
+    return BPlusTree<T>::Iterator(walker, walker->__d_s);
 }
 template<typename T>
 T& BPlusTree<T>::get(const T &input){

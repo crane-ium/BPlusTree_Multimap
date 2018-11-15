@@ -50,12 +50,27 @@ int main()
     //we need be able to construct a new one
     //without taking the values (ints)
     //so then we should take
-    BPlusTree<int> bpt;
+    using BPT = BPlusTree<int>;
+    BPT bpt;
     for(size_t i = 0; i < 100; i++){
         bpt.insert(rand() % 100);
     }
     bpt.print();
     bpt.print_tree();
+    for(size_t i = 0; i < 10; i++){
+
+//        cout << "Finding " << i << ": " << (*ptr) << endl;
+    }
+//    (*bpt.find(8)) = 11;
+    bpt.print_tree();
+    bpt.verify(true);
+
+    typename BPT::Iterator iter;
+    iter = bpt.begin();
+    for(iter=bpt.begin(); iter != bpt.end(); ++iter){
+        cout << (*iter) << " : ";
+        iter.print();
+    }
 //    bpt.print();
 //    bpt.print_tree();
 
