@@ -19,10 +19,12 @@ public:
         friend class BPlusTree;
         Iterator(btree_node<T>* _btn=nullptr, size_t _key=0)
             : __it(_btn), __key(_key){}
-        T operator *(){ //Don't give access to change
+        T& operator *(){ //Don't give access to change
             return __it->__d[__key];
         }
         Iterator operator++(int __empty){
+            if(!__it)
+                return nullptr;
             if(__key < __it->__d_s-1){
                 inc();
             }else{
@@ -30,8 +32,11 @@ public:
                     __it = __it->__n;
                     __key = 0;
                 }else{
-                    if (__key < __it->__d_s)
-                        inc(); //equivalent to Iterator end()
+                    if (__key < __it->__d_s){
+                        __it = nullptr;
+                        __key = 0;
+                    }
+//                        inc(); //equivalent to Iterator end()
                 }
             }
             return (*this);
@@ -39,6 +44,9 @@ public:
         Iterator operator++(){
             (*this)++;
             return (*this);
+        }
+        bool is_null() const{
+            return (__it ? false : true);
         }
         friend operator == (const Iterator& lhs, const Iterator& rhs){
             return (lhs.__it == rhs.__it && lhs.__key == rhs.__key);
@@ -174,7 +182,9 @@ bool BPlusTree<T>::exists(const T &input){
 template<typename T>
 typename BPlusTree<T>::Iterator BPlusTree<T>::find(const T &input){
     btree_node<T>* found = __head->find(input);
-    size_t index = index_of(found->__d, found->__d_s, input);
+    size_t index = 0;
+    if(found)
+        index = index_of(found->__d, found->__d_s, input);
     return BPlusTree<T>::Iterator(found, index);
 }
 template<typename T>
@@ -186,15 +196,15 @@ typename BPlusTree<T>::Iterator BPlusTree<T>::begin(){
 }
 template<typename T>
 typename BPlusTree<T>::Iterator BPlusTree<T>::end(){
-    btree_node<T>* walker = __head;
-    while(!walker->is_leaf())
-        walker = walker->__c[walker->__d_s];
-    return BPlusTree<T>::Iterator(walker, walker->__d_s);
+//    btree_node<T>* walker = __head;
+//    while(!walker->is_leaf())
+//        walker = walker->__c[walker->__d_s];
+    return BPlusTree<T>::Iterator(nullptr);
 }
 template<typename T>
 T& BPlusTree<T>::get(const T &input){
     T* val = __head->exists(input);
-    assert(val!=nullptr);
+//    assert(val!=nullptr);
     return (*val);
 }
 template<typename T>

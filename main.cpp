@@ -25,6 +25,7 @@ void test_pair_v1();
 void test_pair_v2();
 template<typename maptype=simple_map<int, string> >
 void multimap_test1(); //tests map/multimap
+void bplustree_test1();
 using namespace std;
 template<class T>
 struct A{
@@ -44,56 +45,17 @@ struct B : public A<int>, public A<string>{
 };
 int main()
 {
-    //bpt<mpair<string, int> > tree;
-    //the T is mpair<string, int>
-    //if we want to copy an mpair with only the key
-    //we need be able to construct a new one
-    //without taking the values (ints)
-    //so then we should take
-    using BPT = BPlusTree<int>;
-    BPT bpt;
-    bool check;
-    size_t count;
-    for(size_t i = 0; i < 100; i++){
-        check = bpt.insert(rand() % 100);
-        if(check)
-            count++;
-    }
-    bpt.print();
-    bpt.print_tree();
-    for(size_t i = 0; i < 10; i++){
 
-//        cout << "Finding " << i << ": " << (*ptr) << endl;
-    }
-//    (*bpt.find(8)) = 11;
-    bpt.print_tree();
-    bpt.verify(true);
-
-    typename BPT::Iterator iter;
-    iter = bpt.begin();
-    for(iter=bpt.begin(); iter != bpt.end(); ++iter){
-        cout << (*iter) << " : ";
-        iter.print();
-    }
-    cout << "Size: " << bpt.size() << " vs Size count: " << count << endl;
-    bpt.cleartree();
-    assert(bpt.empty());
-    bpt.insert(50);
-    bpt.print();
-    for(iter = bpt.begin(); iter != bpt.end(); iter++)
-        iter.print();
-    cout << "Size: " << bpt.size() << endl;
-    bpt.get(50) = 25;
-    assert(bpt.verify());
-    cout << bpt << endl;
-
-//    bpt.print();
-//    bpt.print_tree();
-
-//    cout << "-------- SIMPLEMAP ---------" << endl;
-//    multimap_test1<>();
-//    cout << "-------- MULTIMAP ---------" << endl;
-//    multimap_test1<multimap<int, string> >();
+//bplustree_test1();
+    cout << "-------- SIMPLEMAP ---------" << endl;
+    multimap_test1<>();
+    cout << "-------- MULTIMAP ---------" << endl;
+    multimap<int, string> mm;
+    mm.insert(1);
+    mm[1] += string("test1");
+    mm[2] += string("test2");
+    mm.print();
+    multimap_test1<multimap<int, string> >();
 //    multimap<string, int> mm;
 
 //    vector<int> vv;
@@ -170,21 +132,22 @@ void multimap_test1(){
     cout << "Unique keys: " << unique_keys
          << (unique_keys==m.size()?" Valid size":" Invalid size") << endl;
     m.print_data();
+//TODO
     //NOW DELETE FROM THE MAP!
     //let's delete the first half of keys, regardless of uniqueness
-    for(size_t i = 0; i < KEYS/2; i++){
-        m.erase(map_keys[i]);
-        if(unq_keys[map_keys[i]-RMIN]){
-            unq_keys[map_keys[i]-RMIN] = 0;
-            unique_keys--;
-        }
-    }
-    cout << "~Deleted from map~" << endl;
-    m.print();
-    cout << "-- AFTER delete data --\n";
-    cout << "Unique keys AFTER DELETE: " << unique_keys
-         << (unique_keys==m.size()?" Valid size":" Invalid size") << endl;
-    m.print_data();
+//    for(size_t i = 0; i < KEYS/2; i++){
+//        m.erase(map_keys[i]);
+//        if(unq_keys[map_keys[i]-RMIN]){
+//            unq_keys[map_keys[i]-RMIN] = 0;
+//            unique_keys--;
+//        }
+//    }
+//    cout << "~Deleted from map~" << endl;
+//    m.print();
+//    cout << "-- AFTER delete data --\n";
+//    cout << "Unique keys AFTER DELETE: " << unique_keys
+//         << (unique_keys==m.size()?" Valid size":" Invalid size") << endl;
+//    m.print_data();
     //Test other various things
     m.clear();
     cout << ">Cleared the tree\n";
@@ -197,21 +160,21 @@ void multimap_test1(){
     }
     m.print();
     m.print_data();
-    cout << ">Copy ctor test: copy first map + insert\n";
-    maptype m2(m);
-    for(size_t i = 0; i < 10; i++)
-        m2.insert(i, to_string(i+100));
-    m2.print();
-    m2.print_data();
-    cout << ">Copy operator test: copy second map + insert\n";
-    maptype m3;
-    m3 = m2;
-    for(size_t i = 5; i < 15; i++)
-        m3[i] += to_string(i);
-    m3.print();
-    m3.print_data();
+//    cout << ">Copy ctor test: copy first map + insert\n";
+//    maptype m2(m);
+//    for(size_t i = 0; i < 10; i++)
+//        m2.insert(i, to_string(i+100));
+//    m2.print();
+//    m2.print_data();
+//    cout << ">Copy operator test: copy second map + insert\n";
+//    maptype m3;
+//    m3 = m2;
+//    for(size_t i = 5; i < 15; i++)
+//        m3[i] += to_string(i);
+//    m3.print();
+//    m3.print_data();
     //Using it directly into cout
-    cout << "map3[3]: " <<  m3[3] << endl;
+//    cout << "map3[3]: " <<  m3[3] << endl;
     cout << "--Complete Tests--\n\n";
 }
 
@@ -379,4 +342,49 @@ void test_pair_v2(){
     map.insert(pair("pairinsert",99));
     map.clear();
     map.print();
+}
+
+void bplustree_test1(){
+    //bpt<mpair<string, int> > tree;
+    //the T is mpair<string, int>
+    //if we want to copy an mpair with only the key
+    //we need be able to construct a new one
+    //without taking the values (ints)
+    //so then we should take
+    using BPT = BPlusTree<int>;
+    BPT bpt;
+    bool check;
+    size_t count = 0;
+    for(size_t i = 0; i < 100; i++){
+        check = bpt.insert(rand() % 100);
+        if(check)
+            count++;
+    }
+    bpt.print();
+    bpt.print_tree();
+    for(size_t i = 0; i < 10; i++){
+
+//        cout << "Finding " << i << ": " << (*ptr) << endl;
+    }
+//    (*bpt.find(8)) = 11;
+    bpt.print_tree();
+    bpt.verify(true);
+    cout << "Size: " << bpt.size() << " vs Size count: " << count << endl;
+
+    typename BPT::Iterator iter;
+    iter = bpt.begin();
+    for(iter=bpt.begin(); iter != bpt.end(); ++iter){
+        cout << (*iter) << " : ";
+        iter.print();
+    }
+    bpt.cleartree();
+    assert(bpt.empty());
+    bpt.insert(50);
+    bpt.print();
+    for(iter = bpt.begin(); iter != bpt.end(); iter++)
+        iter.print();
+    cout << "Size: " << bpt.size() << endl;
+    bpt.get(50) = 25;
+    assert(bpt.verify());
+    cout << bpt << endl;
 }

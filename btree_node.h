@@ -350,6 +350,8 @@ bool btree_node<T>::verify(node_type nt) const{
     //Check children and data align
     bool flag_leaf = true;
     size_t child_count = 0;
+    if(nt == node_type::root && __d_s == 0) //empty root is valid
+        return true;
     if(nt != node_type::root && __d_s == 0){
         if(DEBUG)
             cout << "Verify: empty node\n";

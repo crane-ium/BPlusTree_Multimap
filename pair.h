@@ -17,6 +17,9 @@ struct Pair{
     //COMPARISON OPERATORS
 
     operator V() const;
+    friend bool operator !=(const Pair<K,V>& lhs, const Pair<K,V>& rhs){
+        return (!(lhs==rhs));
+    }
     template<typename M, typename N>
     friend bool operator ==(const Pair<M,N>& lhs, const Pair<M,N>& rhs);
     template<typename M, typename N>

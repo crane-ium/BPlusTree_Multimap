@@ -58,21 +58,24 @@ multimap<K,V>& multimap<K,V>::operator =(const multimap<K,V>& copy){
 }
 template<typename K, typename V>
 vector<V>& multimap<K,V>::operator [](const K& k){
-    MPair<K,V>* ptr = __map.find(k);
-    if(!ptr){
+//    MPair<K,V>* ptr = __map.find(k);
+    typename BPlusTree<MPair<K, V> >::Iterator iter = __map.find(k);
+
+    if(iter.is_null()){
         this->__keys++;
         __map.insert(MPair<K,V>(k));
-        ptr = __map.find(k);
+        iter = __map.find(k);
     }
-    return ptr->vec;
+    return (*iter).vec;
 }
 template<typename K, typename V>
 bool multimap<K,V>::insert(const K& k, const V& v){
     //Inserts a key + value
     bool check = __map.insert(MPair<K,V>(k));
-    if(check)
+    if(check){
         this->__keys++;
-    MPair<K,V>* ptr = __map.find(MPair<K,V>(k));
+    }
+    MPair<K,V>* ptr = &__map.get(MPair<K,V>(k));
     ptr->vec += v;
     return check;
 }
@@ -99,7 +102,7 @@ void multimap<K,V>::print_data(ostream &outs) const{
 }
 template<typename K, typename V>
 bool multimap<K,V>::erase(const K &k){
-    MPair<K,V>* ptr = __map.find(MPair<K,V>(k));
+    MPair<K,V>* ptr = &__map.get(MPair<K,V>(k));
     if(!ptr)
         return false;
     __map.remove((*ptr));
