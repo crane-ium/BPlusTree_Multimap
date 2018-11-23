@@ -122,16 +122,20 @@ BPlusTree<T>::BPlusTree(const BPlusTree<T>& copy){
     /*this->*/
     _min = copy._min;
     __dupes = copy.__dupes;
+    if(DEBUG) cout << "[BPT] copy ctor\n";
     __head = new btree_node<T>((*copy.__head));
+    if(DEBUG) cout << "[BPT] copy ctor DONE\n";
 }
 template<typename T>
 BPlusTree<T>& BPlusTree<T>::operator =(const BPlusTree<T>& copy){
     if(this == (&copy))
         return (*this);
+    if(DEBUG) cout << "[BPT] copy operator\n";
     BPlusTree temp(copy);
     swap(_min, temp._min);
     swap(__dupes, temp.__dupes);
     swap(__head, temp.__head);
+    if(DEBUG) cout << "[BPT] copy operator DONE\n";
     return (*this);
 }
 template<typename T>

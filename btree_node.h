@@ -24,8 +24,8 @@ struct btree_node{
     btree_node(size_t min=1, bool dupes=false);
     //BIG3
     ~btree_node();
-    btree_node(const btree_node<T>& copy);
-    btree_node<T>& operator =(const btree_node<T>& copy);
+    btree_node(btree_node<T> &copy);
+    btree_node<T>& operator =(const btree_node<T> &copy);
     //MEMBER FUNCTIONS
     bool insert(const T& input, bool force=false);
     bool remove(const T& input); //Removes a found input
@@ -85,40 +85,81 @@ btree_node<T>::~btree_node(){
     }
 }
 template<typename T>
-btree_node<T>::btree_node(const btree_node<T>& copy){
+btree_node<T>::btree_node(btree_node<T>& copy){
+//TODO
     if(DEBUG) cout << "CALLING COPY CTOR on " << copy << endl;;
-    __dupes = copy.__dupes;
-    _min = copy._min;
-    __d_s = copy.__d_s;
-    //allocate space first
-    __d = new T[2*_min+1]; //2*min is limit; give it space to hold an extra past threshold
-    __c = new btree_node<T>*[2*_min+2]; //2*min+1 is limit, extra to hold past threshold
-    //fill the space with copy's data
-    for(size_t i = 0; i < 2*_min+1; i++){
-        __d[i] = copy.__d[i];
-    }
-    if(!copy.is_leaf())
-        for(size_t i = 0; i < 2*_min+2; i++){
-            if(copy.__c[i]){ //check that it is not nullptr
-                __c[i] = new btree_node<T>((*copy.__c[i])); //recursive call
-            }else
-                __c[i] = nullptr;
-        }
-    else
-        for(size_t i = 0; i < 2*_min+2; i++)
+    if(copy.__d_s == 0){
+        __d_s = 0;
+    //    __c_s = 0;
+        __d = new T[_min*2+1];
+        __c = new btree_node<T>*[_min*2+2];
+        for(size_t i = 0; i < _min*2+2; i++)
             __c[i] = nullptr;
+        return;
+    }
+    size_t count = 0;
+    btree_node<T>* temp = new btree_node<T>();
+    btree_node<T>* copy_walker = &copy;
+    while(!copy_walker->is_leaf())
+        copy_walker = copy_walker->__c[0]; //Set to left most leaf node
+    while(copy_walker != nullptr){
+//        temp->print();
+//        cout << endl;
+        temp->insert(copy_walker->__d[count]);
+        fix_excess(temp);
+        count++;
+        if(count == copy_walker->__d_s){
+            copy_walker = copy_walker->__n;
+            count = 0;
+        }
+    }
+//    cout << "temp: ";
+//    temp->print();
+//    cout << " done\n";
+    swap(__d_s, temp->__d_s);
+    swap(__dupes, temp->__dupes);
+    swap(_min, temp->_min);
+    swap(__d, temp->__d);
+    swap(__c, temp->__c);
+    swap(__n, temp->__n);
+//    cout << "this: ";
+//    this->print();
+//    __dupes = copy.__dupes;
+//    _min = copy._min;
+//    __d_s = copy.__d_s;
+//    //allocate space first
+//    __d = new T[2*_min+1]; //2*min is limit; give it space to hold an extra past threshold
+//    __c = new btree_node<T>*[2*_min+2]; //2*min+1 is limit, extra to hold past threshold
+//    //fill the space with copy's data
+//    for(size_t i = 0; i < 2*_min+1; i++){
+//        __d[i] = copy.__d[i];
+//    }
+//    if(!copy.is_leaf())
+//        for(size_t i = 0; i < 2*_min+2; i++){
+//            if(copy.__c[i]){ //check that it is not nullptr
+//                __c[i] = new btree_node<T>((*copy.__c[i])); //recursive call
+//            }else
+//                __c[i] = nullptr;
+//        }
+//    else
+//        for(size_t i = 0; i < 2*_min+2; i++)
+//            __c[i] = nullptr;
+
     if(DEBUG) cout << "COPY CTOR DONE FOR " << (*this) << endl;
 }
 template<typename T>
-btree_node<T>& btree_node<T>::operator =(const btree_node<T>& copy){
+btree_node<T>& btree_node<T>::operator =(const btree_node<T> &copy){
+    if(DEBUG) cout << "Calling copy operator on " << copy << endl;
     if(this == &copy)
         return (*this);
+    cout << "Here!!!!!!!!!!!!!!!!!\n";
     btree_node<T> temp(copy);
     swap(__dupes, temp.__dupes);
     swap(_min, temp._min);
     swap(__d_s, temp.__d_s);
     swap(__d, temp.__d);
     swap(__c, temp.__c);
+    swap(__n, temp.__n);
     return (*this);
 }
 template<typename T>
@@ -239,8 +280,8 @@ void btree_node<T>::print() const{
         if(__n != nullptr){
             cout << "-->";
             __n->print();
-        }else
-            cout << endl;
+        }/*else
+            cout << endl;*/
     }
 }
 template<typename T>

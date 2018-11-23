@@ -26,6 +26,9 @@ void test_pair_v2();
 template<typename maptype=simple_map<int, string> >
 void multimap_test1(); //tests map/multimap
 void bplustree_test1();
+void print_strings(string* args){
+
+}
 using namespace std;
 template<class T>
 struct A{
@@ -47,14 +50,9 @@ int main()
 {
 
 //bplustree_test1();
-    cout << "-------- SIMPLEMAP ---------" << endl;
+//    cout << "-------- SIMPLEMAP ---------" << endl;
     multimap_test1<>();
-    cout << "-------- MULTIMAP ---------" << endl;
-    multimap<int, string> mm;
-    mm.insert(1);
-    mm[1] += string("test1");
-    mm[2] += string("test2");
-    mm.print();
+//    cout << "-------- MULTIMAP ---------" << endl;
     multimap_test1<multimap<int, string> >();
 //    multimap<string, int> mm;
 
@@ -160,21 +158,22 @@ void multimap_test1(){
     }
     m.print();
     m.print_data();
-//    cout << ">Copy ctor test: copy first map + insert\n";
-//    maptype m2(m);
-//    for(size_t i = 0; i < 10; i++)
-//        m2.insert(i, to_string(i+100));
-//    m2.print();
-//    m2.print_data();
-//    cout << ">Copy operator test: copy second map + insert\n";
-//    maptype m3;
-//    m3 = m2;
-//    for(size_t i = 5; i < 15; i++)
-//        m3[i] += to_string(i);
-//    m3.print();
-//    m3.print_data();
-    //Using it directly into cout
-//    cout << "map3[3]: " <<  m3[3] << endl;
+    cout << ">Copy ctor test: copy first map + insert\n";
+    maptype m2(m);
+    for(size_t i = 0; i < 10; i++)
+        m2.insert(i, to_string(i+100));
+    m2.print();
+    m2.print_data();
+    cout << ">Copy operator test: copy second map + insert\n";
+    maptype m3;
+    cout << ">Printing final m3 data\n";
+    m3 = m2;
+    for(size_t i = 5; i < 15; i++)
+        m3[i] += to_string(i);
+    m3.print();
+    m3.print_data();
+//    Using it directly into cout
+    cout << "map3[3]: " <<  m3[3] << endl;
     cout << "--Complete Tests--\n\n";
 }
 

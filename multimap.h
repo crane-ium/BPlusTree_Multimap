@@ -23,12 +23,13 @@ public:
 
     using simple_map<K, vector<V> >::size; //make inherted private class's function public
 //    size_t size() const{return this->__keys;}
-    void print() const{__map.print();}
+    void print() const{__map.print();cout << endl;}
     void print_data(ostream &outs=cout) const;
 
     friend ostream& operator <<(ostream& outs, const multimap<K,V>& m){
-        outs << "------------ MAP -------------" << endl;
-        outs << m.__map << endl;
+//        outs << "------------ MAP -------------" << endl;
+        outs << m.__map;
+//        outs << endl;
         return outs;
     }
 private:

@@ -20,7 +20,7 @@ public:
     V& at(const K& k);
     const V& at(const K& k) const;
     //MEMBER MODIFIERS
-    virtual bool insert(const K& k, const V& v);
+    virtual bool insert(const K& k, const V& v=V());
     virtual bool insert(const Pair<K,V>& pair);
     virtual bool erase(const K& k);
     virtual void clear();
@@ -29,10 +29,11 @@ public:
     virtual bool is_valid() const {return (__map.verify());}
     virtual void print_data(ostream& outs=cout) const; //prints some stats about current map
 
-    virtual void print() const{ __map.print();}
+    virtual void print() const{ __map.print(); cout << endl;}
     friend ostream& operator<<(ostream& outs, const simple_map<K,V>& m){
-        outs << "------------ MAP -------------" << endl;
-        outs << m.__map << endl;
+//        outs << "------------ MAP -------------" << endl;
+        outs << m.__map;
+//        outs << endl;
         return outs;
     }
 
@@ -48,16 +49,20 @@ simple_map<K,V>::simple_map(){
 }
 template<typename K, typename V>
 simple_map<K,V>::simple_map(const simple_map<K,V>& copy){
+    if(DEBUG) cout << "[SIMPLEMAP] copy ctor\n";
     __map = copy.__map;
     __keys = copy.__keys;
+    if(DEBUG) cout << "[SIMPLEMAP] copy ctor DONE\n";
 }
 template<typename K, typename V>
 simple_map<K,V>& simple_map<K,V>::operator =(const simple_map<K,V>& copy){
     if(this == &copy)
         return (*this);
+    if(DEBUG) cout << "[SIMPLEMAP] copy operator\n";
     simple_map<K,V> temp(copy);
-    swap(temp.__keys, __keys);
-    swap(temp.__map, __map);
+    swap(__keys, temp.__keys);
+    if(DEBUG) cout << "[SIMPLEMAP] copy operator DONE\n";
+    swap(__map, temp.__map);
     //temp becomes out of scope and is deleted
     return (*this);
 }
