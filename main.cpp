@@ -8,6 +8,8 @@
 #include <ctime>
 #include "multimap.h"
 
+int DEBUG = 0;
+
 void test_BPlusTree_auto(int tree_size=5000, int how_many=500, bool report=false);
 bool test_BPlusTree_auto(int how_many, bool report=true);
 int Random(int lo, int hi)
@@ -16,42 +18,20 @@ int Random(int lo, int hi)
 
     return r;
 }
-struct tester{
-    int val;
-    tester(int v=0):val(v){}
-};
 void old_tests();
 void test_pair_v1();
 void test_pair_v2();
 template<typename maptype=simple_map<int, string> >
 void multimap_test1(); //tests map/multimap
 void bplustree_test1();
-void print_strings(string* args){
 
-}
 using namespace std;
-template<class T>
-struct A{
-    T item;
-    A(const T& i=T()):item(i){}
-    void assign(const T& i){item = i;}
-    virtual void display() const{
-        cout << item << endl;
-    }
-};
-//template<class T>
-struct B : public A<int>, public A<string>{
-    B():A<int>(), A<string>(){}
-    void display() const{
-        cout << A<int>::item << " : " << A<string>::item << endl;
-    }
-};
+
 int main()
 {
-
 //bplustree_test1();
 //    cout << "-------- SIMPLEMAP ---------" << endl;
-    multimap_test1<>();
+//    multimap_test1<>();
 //    cout << "-------- MULTIMAP ---------" << endl;
     multimap_test1<multimap<int, string> >();
 //    multimap<string, int> mm;

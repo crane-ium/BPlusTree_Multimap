@@ -10,7 +10,7 @@
   */
 #include "btree_functions.h"
 
-static const int DEBUG = 0;
+extern int DEBUG;
 
 using namespace std;
 

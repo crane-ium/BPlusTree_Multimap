@@ -14,7 +14,8 @@ HEADERS += \
     dictmap.h \
     mpair.h \
     multimap.h \
-    bplustree.h
+    bplustree.h \
+    globals.h
 
 DISTFILES += \
     work_report.txt \

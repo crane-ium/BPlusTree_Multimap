@@ -48,10 +48,10 @@ public:
         bool is_null() const{
             return (__it ? false : true);
         }
-        friend operator == (const Iterator& lhs, const Iterator& rhs){
+        friend bool operator == (const Iterator& lhs, const Iterator& rhs){
             return (lhs.__it == rhs.__it && lhs.__key == rhs.__key);
         }
-        friend operator != (const Iterator& lhs, const Iterator& rhs){
+        friend bool operator != (const Iterator& lhs, const Iterator& rhs){
             return (!(lhs==rhs));
         }
         void print() const{
