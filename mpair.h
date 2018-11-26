@@ -8,10 +8,15 @@ using namespace std;
 
 template<typename K, typename V>
 struct MPair : public Pair<K,V>{
+    //CTORS
     vector<V> vec;
     MPair(const K& k=K());
     MPair(const K &k, const V& v);
     MPair(const K& k, const vector<V>& v);
+    //BIG 3
+    MPair(const MPair<K,V>& rhs);
+    MPair<K,V>& operator =(const MPair<K,V>& rhs);
+
     MPair<K,V>& operator =(const vector<V>& v){
         vec.clear();
         copy(v.begin(), v.end(), back_inserter(vec));
@@ -26,6 +31,20 @@ struct MPair : public Pair<K,V>{
 template<typename K, typename V>
 MPair<K,V>::MPair(const K &k): Pair<K,V>(k){
 
+}
+template<typename K, typename V>
+MPair<K,V>::MPair(const MPair<K,V>& rhs) : Pair<K,V>(){
+    //copy the rhs by a vector deep copy
+    this->key = rhs.key;
+    (*this) = rhs.vec; //call already built vector copy in MPair
+}
+template<typename K, typename V>
+MPair<K,V>& MPair<K,V>::operator =(const MPair<K,V>& rhs){
+    if(this == &rhs)
+        return (*this);
+    this->key = rhs.key;
+    (*this) = rhs.vec; //call MPair overload vec copy;
+    return (*this);
 }
 template<typename K, typename V>
 MPair<K,V>::MPair(const K &k, const V &v): Pair<K,V>(k){

@@ -78,8 +78,8 @@ public:
 
     //ITERATOR FUNCTIONS
     Iterator find(const T& input);
-    Iterator begin();
-    Iterator end();
+    Iterator begin() const;
+    Iterator end() const;
 
     void cleartree(); //Clears all but the root
     void print() const; //Prints the linked-list of bplustree
@@ -123,7 +123,11 @@ BPlusTree<T>::BPlusTree(const BPlusTree<T>& copy){
     _min = copy._min;
     __dupes = copy.__dupes;
     if(DEBUG) cout << "[BPT] copy ctor\n";
-    __head = new btree_node<T>((*copy.__head));
+//    __head = new btree_node<T>((*copy.__head));
+    typename BPlusTree::Iterator iter;
+    for(iter = copy.begin(); iter != copy.end(); iter++){
+        insert(*iter);
+    }
     if(DEBUG) cout << "[BPT] copy ctor DONE\n";
 }
 template<typename T>
@@ -131,10 +135,17 @@ BPlusTree<T>& BPlusTree<T>::operator =(const BPlusTree<T>& copy){
     if(this == (&copy))
         return (*this);
     if(DEBUG) cout << "[BPT] copy operator\n";
-    BPlusTree temp(copy);
-    swap(_min, temp._min);
-    swap(__dupes, temp.__dupes);
-    swap(__head, temp.__head);
+//    BPlusTree temp(copy);
+//    swap(_min, temp._min);
+//    swap(__dupes, temp.__dupes);
+//    swap(__head, temp.__head);
+    _min = copy._min;
+    __dupes = copy.__dupes;
+//    __head = new btree_node<T>(*copy.__head);
+    typename BPlusTree::Iterator iter;
+    for(iter = copy.begin(); iter != copy.end(); iter++){
+        insert(*iter);
+    }
     if(DEBUG) cout << "[BPT] copy operator DONE\n";
     return (*this);
 }
@@ -192,14 +203,14 @@ typename BPlusTree<T>::Iterator BPlusTree<T>::find(const T &input){
     return BPlusTree<T>::Iterator(found, index);
 }
 template<typename T>
-typename BPlusTree<T>::Iterator BPlusTree<T>::begin(){
+typename BPlusTree<T>::Iterator BPlusTree<T>::begin() const{
     btree_node<T>* walker = __head;
     while(!walker->is_leaf()) //Travel to the first leaf
         walker = walker->__c[0];
     return BPlusTree<T>::Iterator(walker);
 }
 template<typename T>
-typename BPlusTree<T>::Iterator BPlusTree<T>::end(){
+typename BPlusTree<T>::Iterator BPlusTree<T>::end() const{
 //    btree_node<T>* walker = __head;
 //    while(!walker->is_leaf())
 //        walker = walker->__c[walker->__d_s];

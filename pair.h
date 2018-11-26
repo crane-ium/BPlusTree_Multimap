@@ -12,8 +12,9 @@ struct Pair{
     V val;
     //CTOR
     Pair(const K& k=K(), const V& v=V());
+    Pair<K,V>& operator =(const Pair<K,V>& rhs);
     //MODIFIERS
-    Pair<K,V>& operator =(const V& right);
+    Pair<K,V>& operator =(const V& rhs);
     //COMPARISON OPERATORS
 
     operator V() const;
@@ -37,8 +38,21 @@ struct Pair{
 
 template<typename K, typename V>
 Pair<K,V>::Pair(const K &k, const V &v)
-    : key(k), val(v){
+    : key(K(k)), val(V(v)){
 
+}
+template<typename K, typename V>
+Pair<K,V>& Pair<K,V>::operator =(const Pair<K,V>& rhs){
+    if(this == &rhs)
+        return (*this);
+    key = rhs.key;
+    val = rhs.val;
+    return (*this);
+}
+template<typename K, typename V>
+Pair<K,V>& Pair<K,V>::operator =(const V&rhs){
+    this->val = rhs;
+    return (*this);
 }
 template<typename K, typename V>
 bool operator ==(const Pair<K, V>& lhs, const Pair<K, V>& rhs){
@@ -70,11 +84,6 @@ template<typename K, typename V>
 std::ostream& operator <<(std::ostream& outs, const Pair<K,V>& print){
     outs << "(" << print.key << ": " << print.val << ")";
     return outs;
-}
-template<typename K, typename V>
-Pair<K,V>& Pair<K,V>::operator =(const V& right){
-    this->val = right;
-    return (*this);
 }
 template<typename K, typename V>
 Pair<K,V>::operator V() const{

@@ -50,8 +50,9 @@ simple_map<K,V>::simple_map(){
 template<typename K, typename V>
 simple_map<K,V>::simple_map(const simple_map<K,V>& copy){
     if(DEBUG) cout << "[SIMPLEMAP] copy ctor\n";
-    __map = copy.__map;
+    __map = copy.__map; //call bpt copy operator
     __keys = copy.__keys;
+    cout << "Keys: " << __keys << endl;
     if(DEBUG) cout << "[SIMPLEMAP] copy ctor DONE\n";
 }
 template<typename K, typename V>
@@ -59,10 +60,12 @@ simple_map<K,V>& simple_map<K,V>::operator =(const simple_map<K,V>& copy){
     if(this == &copy)
         return (*this);
     if(DEBUG) cout << "[SIMPLEMAP] copy operator\n";
-    simple_map<K,V> temp(copy);
-    swap(__keys, temp.__keys);
+//    simple_map<K,V> temp(copy);
+//    swap(__keys, temp.__keys);
+    __keys = copy.__keys;
+    __map = copy.__map;
     if(DEBUG) cout << "[SIMPLEMAP] copy operator DONE\n";
-    swap(__map, temp.__map);
+//    swap(__map, temp.__map);
     //temp becomes out of scope and is deleted
     return (*this);
 }

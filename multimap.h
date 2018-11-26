@@ -84,10 +84,12 @@ template<typename K, typename V>
 multimap<K,V>& multimap<K,V>::operator =(const multimap<K,V>& copy){
     if(this == &copy)
         return (*this);
+    this->__keys = copy.__keys;
+    this->__map = copy.__map;
     //copy-swap idiom
-    multimap<K,V> temp(copy); //copy ctor
-    swap(this->__keys, temp.__keys);
-    swap(__map, temp.__map);
+//    multimap<K,V> temp(copy); //copy ctor
+//    swap(this->__keys, temp.__keys);
+//    swap(__map, temp.__map);
     return(*this);
 }
 template<typename K, typename V>

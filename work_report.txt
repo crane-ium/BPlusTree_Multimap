@@ -1,11 +1,15 @@
+Recent additions:
+-Optimized some things
+
 Working on:
--Complete protection/encapsulation
--Fixing outdated functions for bplustree
 -Adding remove
 
 Issues:
+-BPT copy ctor/op is not an exact copy since it alters the
+ structure of the original tree
 -Clean up efficiency?
 -Speed up any redundancies, perhaps in the case of moving data
- -Also suggestion for btree about merging before rotation
+
 
 Missing:
+-Remove()

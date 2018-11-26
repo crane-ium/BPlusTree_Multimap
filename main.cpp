@@ -31,7 +31,7 @@ int main()
 {
 //bplustree_test1();
 //    cout << "-------- SIMPLEMAP ---------" << endl;
-//    multimap_test1<>();
+    multimap_test1<>();
 //    cout << "-------- MULTIMAP ---------" << endl;
     multimap_test1<multimap<int, string> >();
 //    multimap<string, int> mm;
@@ -110,6 +110,7 @@ void multimap_test1(){
     cout << "Unique keys: " << unique_keys
          << (unique_keys==m.size()?" Valid size":" Invalid size") << endl;
     m.print_data();
+    cout << endl;
 //TODO
     //NOW DELETE FROM THE MAP!
     //let's delete the first half of keys, regardless of uniqueness
@@ -127,6 +128,13 @@ void multimap_test1(){
 //         << (unique_keys==m.size()?" Valid size":" Invalid size") << endl;
 //    m.print_data();
     //Test other various things
+    maptype m4(m);
+    m4 = m;
+    m4 = m4;
+    cout << ">Copied big tree\n";
+    m4.print();
+    m4.print_data();
+    cout << endl;
     m.clear();
     cout << ">Cleared the tree\n";
     m.print();
@@ -140,6 +148,8 @@ void multimap_test1(){
     m.print_data();
     cout << ">Copy ctor test: copy first map + insert\n";
     maptype m2(m);
+//    m2.print();
+//    m2.print_data();
     for(size_t i = 0; i < 10; i++)
         m2.insert(i, to_string(i+100));
     m2.print();
@@ -154,7 +164,9 @@ void multimap_test1(){
     m3.print_data();
 //    Using it directly into cout
     cout << "map3[3]: " <<  m3[3] << endl;
-    cout << "--Complete Tests--\n\n";
+    cout << "===============================================\n";
+    cout << "--Complete Tests--\n";
+    cout << "===============================================\n";
 }
 
 void test_BPlusTree_auto(int tree_size, int how_many, bool report){
