@@ -204,9 +204,15 @@ typename BPlusTree<T>::Iterator BPlusTree<T>::find(const T &input){
 }
 template<typename T>
 typename BPlusTree<T>::Iterator BPlusTree<T>::begin() const{
+    if(DEBUG) cout << "[BPT].it begin()\n";
     btree_node<T>* walker = __head;
     while(!walker->is_leaf()) //Travel to the first leaf
         walker = walker->__c[0];
+    if(walker == __head && __head->__d_s == 0){
+        if(DEBUG) cout << "[BPT].it begin(): head empty (NOBIGGY)\n";
+        return BPlusTree<T>::Iterator(nullptr);
+    }
+    if(DEBUG) cout << "[BPT].it begin done\n";
     return BPlusTree<T>::Iterator(walker);
 }
 template<typename T>

@@ -8,7 +8,7 @@
 #include <ctime>
 #include "multimap.h"
 
-int DEBUG = 0;
+int DEBUG = 1;
 
 void test_BPlusTree_auto(int tree_size=5000, int how_many=500, bool report=false);
 bool test_BPlusTree_auto(int how_many, bool report=true);
@@ -29,11 +29,13 @@ using namespace std;
 
 int main()
 {
+    simple_map<string, multimap<string, long> > test;
+
 //bplustree_test1();
 //    cout << "-------- SIMPLEMAP ---------" << endl;
-    multimap_test1<>();
+//    multimap_test1<>();
 //    cout << "-------- MULTIMAP ---------" << endl;
-    multimap_test1<multimap<int, string> >();
+//    multimap_test1<multimap<int, string> >();
 //    multimap<string, int> mm;
 
 //    vector<int> vv;

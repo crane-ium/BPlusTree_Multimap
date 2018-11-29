@@ -22,8 +22,8 @@ struct MPair : public Pair<K,V>{
         copy(v.begin(), v.end(), back_inserter(vec));
         return (*this);
     }
-    template<typename M, typename N>
-    friend ostream& operator <<(ostream& outs, const MPair<M,N>& mp){
+//    template<typename M, typename N>
+    friend ostream& operator <<(ostream& outs, const MPair<K,V>& mp){
         outs << "(" << mp.key << ": " << mp.vec << ")";
         return outs;
     }
