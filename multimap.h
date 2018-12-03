@@ -16,8 +16,8 @@ public:
             return *this;
         }
         Iterator operator++(){__iter++; return *this;}
-        K& operator *(){
-            return (*__iter).key;
+        MPair<K,V>& operator *(){
+            return (*__iter);
         }
         friend bool operator ==(const Iterator& lhs, const Iterator& rhs){
             return lhs.__iter == rhs.__iter;

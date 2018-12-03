@@ -10,6 +10,32 @@
 template<typename K=long long, typename V=int>
 class simple_map{
 public:
+    class Iterator{
+    public:
+        friend class simple_map;
+        Iterator(bool unassigned=true, bool end=false):__unassigned(unassigned), __end(end){}
+        Iterator operator++(int __empty){
+            __iter++;
+            return *this;
+        }
+        Iterator operator++(){__iter++; return *this;}
+        Pair<K,V>& operator *(){
+            return (*__iter);
+        }
+        friend bool operator ==(const Iterator& lhs, const Iterator& rhs){
+            return lhs.__iter == rhs.__iter;
+        }
+        friend bool operator !=(const Iterator& lhs, const Iterator& rhs){
+            return !(lhs.__iter == rhs.__iter);
+        }
+        Iterator& operator =(const typename BPlusTree<Pair<K,V> >::Iterator& it){
+            __iter = it;
+            return *this;
+        }
+    private:
+        typename BPlusTree<Pair<K,V> >::Iterator __iter;
+        bool __end, __unassigned;
+    };
     //CTORS
     simple_map();
     simple_map(const simple_map<K,V>& copy);
@@ -24,6 +50,13 @@ public:
     virtual bool insert(const Pair<K,V>& pair);
     virtual bool erase(const K& k);
     virtual void clear();
+    //ITERATOR STUFF
+    Iterator begin(){Iterator it; it = __map.begin(); return it;}
+    Iterator end(){Iterator it; it = __map.end(); return it;}
+    Iterator lower_bound(const K& k){Iterator it; it = __map.find(Pair<K,V>(k));
+                                    return it;}
+    Iterator upper_bound(const K& k){Iterator it; it = __map.find(Pair<K,V>(k));
+                                     return it;}
 
     size_t size() const;
     virtual bool is_valid() const {return (__map.verify());}

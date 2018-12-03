@@ -102,6 +102,24 @@ vector<T>& operator +=(vector<T>& left, const T& right){
     left.push_back(right);
     return left;
 }
+//Add the right vector to the left one, while keeping left sorted
+template<typename T>
+vector<T>& add_sorted(vector<T>& left, const vector<T>& right){
+    //we must assume left is already sorted for this to work
+    for(auto rit = right.begin(); rit != right.end(); rit++){
+        bool flag = false;
+        for(auto lit = left.begin(); lit != left.end(); lit++){
+            if((*rit) < (*lit)){
+                left.insert(lit, (*rit));
+                flag = true;
+                break;
+            }
+        }
+        if(!flag)
+            left.push_back((*rit));
+    }
+    return left;
+}
 template<typename T>
 vector<T>& operator -=(vector<T>& left, const T& right){
     left.erase(std::remove(left.begin(), left.end(), right), left.end());
