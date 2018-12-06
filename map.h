@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <typeinfo>
+#include <exception>
 #include "bplustree.h"
 #include "pair.h"
 
@@ -37,7 +38,7 @@ public:
         bool __end, __unassigned;
     };
     //CTORS
-    simple_map();
+    simple_map(bool defaultdict=true);
     simple_map(const simple_map<K,V>& copy);
     simple_map<K,V>& operator =(const simple_map<K,V>& copy);
 
@@ -73,12 +74,15 @@ public:
 protected:
     BPlusTree<Pair<K,V> > __map; //By default stores integers as keys
     size_t __keys; //I have size functions, this reduces workload though
+    bool __defaultdict=true; //If defaultdict, throws exception when accessing non-existant
 };
 
 template<typename K, typename V>
-simple_map<K,V>::simple_map(){
+simple_map<K,V>::simple_map(bool defaultdict): __defaultdict(defaultdict){
 //    map(2, false);
     __keys = 0;
+    if(!__defaultdict)
+        __map.set_not_defaultdict();
 }
 template<typename K, typename V>
 simple_map<K,V>::simple_map(const simple_map<K,V>& copy){
@@ -131,6 +135,12 @@ template<typename K, typename V>
 size_t simple_map<K,V>::size() const{
     return __keys;
 }
+//unused error. Exception thrown in bplustree
+struct SimpleMapNot : exception{
+    const char* what() const throw(){
+        return "Simple Map not defaultdict. Accessed key does not exist.";
+    }
+};
 template<typename K, typename V>
 V& simple_map<K,V>::operator [](const K& k){
     return at(k);

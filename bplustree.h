@@ -2,7 +2,16 @@
 #define BPLUSTREE_H
 
 #include <iostream>
+#include <exception>
 #include "btree_node.h"
+
+//Exception handling for a non-default dict. Prevent index access/creation
+//  if not defaultdict
+struct BPTIndexException : public std::exception{
+    const char* what() const throw(){
+        return "[BPT]: Index in non-defaultdict does not exist.";
+    }
+};
 
 template<typename T>
 /**
@@ -87,6 +96,9 @@ public:
     bool verify(bool output=false) const;
     bool empty() const;
     size_t size();
+    void set_defaultdict(){__defaultdict=true;}
+    void set_not_defaultdict(){__defaultdict=false;}
+    bool is_defaultdict(){return __defaultdict;}
 //    void operator ()(const size_t& min, const bool& dupes){
 //        if(__head->is_leaf()){
 //            if(min > _min){
@@ -107,6 +119,7 @@ private:
     bool __dupes;
     btree_node<T>* __head;
     size_t __size; //Track the size;
+    bool __defaultdict=true;
 };
 
 template<typename T>
@@ -122,6 +135,7 @@ BPlusTree<T>::BPlusTree(const BPlusTree<T>& copy){
     /*this->*/
     _min = copy._min;
     __dupes = copy.__dupes;
+    __defaultdict = copy.__defaultdict;
     if(DEBUG) cout << "[BPT] copy ctor\n";
 //    __head = new btree_node<T>((*copy.__head));
     typename BPlusTree::Iterator iter;
@@ -141,6 +155,7 @@ BPlusTree<T>& BPlusTree<T>::operator =(const BPlusTree<T>& copy){
 //    swap(__head, temp.__head);
     _min = copy._min;
     __dupes = copy.__dupes;
+    __defaultdict = copy.__defaultdict;
 //    __head = new btree_node<T>(*copy.__head);
     typename BPlusTree::Iterator iter;
     for(iter = copy.begin(); iter != copy.end(); iter++){
@@ -225,6 +240,8 @@ typename BPlusTree<T>::Iterator BPlusTree<T>::end() const{
 template<typename T>
 T& BPlusTree<T>::get(const T &input){
     T* val = __head->exists(input);
+    if(val==nullptr && !__defaultdict)
+        throw BPTIndexException();
 //    assert(val!=nullptr);
     return (*val);
 }
