@@ -51,6 +51,9 @@ public:
     virtual bool insert(const Pair<K,V>& pair);
     virtual bool erase(const K& k);
     virtual void clear();
+    bool empty() const{return size()==0;}
+    bool not_empty() const{return size()!=0;}
+    bool exists(const K& k) const{return __map.exists(Pair<K,V>(k));}
     //ITERATOR STUFF
     Iterator begin(){Iterator it; it = __map.begin(); return it;}
     Iterator end(){Iterator it; it = __map.end(); return it;}

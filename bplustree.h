@@ -81,7 +81,7 @@ public:
     bool insert(const T& input);
     bool remove(const T& input);
 
-    bool exists(const T& input);
+    bool exists(const T& input) const;
 //    T* find(const T& input);
     T& get(const T& input);
 
@@ -205,7 +205,7 @@ std::ostream& operator <<(std::ostream& outs, const BPlusTree<T>& bt){
     return outs;
 }
 template<typename T>
-bool BPlusTree<T>::exists(const T &input){
+bool BPlusTree<T>::exists(const T &input) const{
     return (__head->exists(input) != nullptr);
 }
 //----------ITERATOR FUNCTIONS----------

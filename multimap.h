@@ -44,6 +44,7 @@ public:
     bool insert(const MPair<K,V>& pair);
     bool contains(const K& k);
     bool erase(const K &k);
+    bool exists(const K& k){return __map.exists(MPair<K,V>(k));}
 
     void clear() {__map.cleartree();this->__keys=0;}
     bool is_valid() const{return __map.verify();}

@@ -30,7 +30,7 @@ struct btree_node{
     bool insert(const T& input, bool force=false);
     bool remove(const T& input); //Removes a found input
 
-    T *exists(const T& input); //Returns ptr/nullptr of found/notfound data
+    T *exists(const T& input) const; //Returns ptr/nullptr of found/notfound data
     btree_node<T>* find(const T& input); //Returns node containing the input, or nullptr if dne
 //    T& get_var(const T& input); //Returns reference of data; Assumes exists
 
@@ -641,7 +641,7 @@ void btree_node<T>::merge(btree_node<T>* left, btree_node<T>* &right){
     right=nullptr;
 }
 template<typename T>
-T* btree_node<T>::exists(const T& input){
+T* btree_node<T>::exists(const T& input) const{
     if(is_leaf()){ //BPTree only considers leaf data as real data
         size_t index = index_of(__d, __d_s, input);
         if(DEBUG) cout << (*this) << endl;
